@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { AdminLayout } from "@/components/admin/admin-layout"
 import { SalesChart } from "@/components/admin/sales-chart"
 import { RevenueChart } from "@/components/admin/revenue-chart"
@@ -10,10 +9,9 @@ import { TopProducts } from "@/components/admin/top-products"
 import { TrafficChart } from "@/components/admin/traffic-chart"
 import { DollarSign, ShoppingCart, Users, Package, TrendingUp } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
-import { authFetch, isLoggedIn } from "@/lib/api"
+import { authFetch, getToken } from "@/lib/api"
 
 export default function DashboardPage() {
-  const router = useRouter()
   const [stats, setStats] = useState({
     totalRevenue: 0,
     totalOrders: 0,
@@ -21,21 +19,37 @@ export default function DashboardPage() {
     totalCustomers: 0,
     loading: true,
   })
+  const [authReady, setAuthReady] = useState(false)
 
+  // ✅ Wait for auth to be ready before making API calls
   useEffect(() => {
-    // Check if logged in
-    if (!isLoggedIn()) {
-      router.push('/login');
-      return;
+    const checkAuth = () => {
+      const token = getToken()
+      if (token) {
+        setAuthReady(true)
+      } else {
+        // Token not found - this shouldn't happen if AdminLayout is working
+        // But handle it gracefully
+        console.warn("⚠️ No token found in Dashboard - auth may have been lost")
+      }
     }
 
+    // Small delay to ensure AdminLayout has completed auth check
+    const timer = setTimeout(checkAuth, 100)
+    return () => clearTimeout(timer)
+  }, [])
+
+  // ✅ Only fetch data after auth is confirmed
+  useEffect(() => {
+    if (!authReady) return
+
     const fetchStats = async () => {
-      console.log('📊 Fetching dashboard stats...')
+      console.log("📊 Fetching dashboard stats...")
       try {
         const [ordersData, productsData, usersData] = await Promise.all([
-          authFetch('/api/order/list'),
-          authFetch('/api/product/list'),
-          authFetch('/api/user/list'),
+          authFetch("/api/order/list"),
+          authFetch("/api/product/list"),
+          authFetch("/api/user/list"),
         ])
 
         const orders = ordersData.success ? ordersData.orders : []
@@ -48,18 +62,15 @@ export default function DashboardPage() {
           totalCustomers: usersData.success ? usersData.users?.length || 0 : 0,
           loading: false,
         })
-        console.log('✅ Dashboard stats loaded:', stats)
+        console.log("✅ Dashboard stats loaded")
       } catch (err: any) {
-        console.error('❌ Dashboard fetch error:', err.message)
+        console.error("❌ Dashboard fetch error:", err.message)
         setStats(prev => ({ ...prev, loading: false }))
-        if (err.message.includes('Not authorized')) {
-          router.push('/login');
-        }
       }
     }
 
     fetchStats()
-  }, [router])
+  }, [authReady])
 
   const statCards = [
     {

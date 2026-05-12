@@ -1,42 +1,59 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Sidebar } from "./sidebar"
 import { Header } from "./header"
 import { cn } from "@/lib/utils"
+import { getToken } from "@/lib/api"
 
-interface AdminLayoutProps {
-  children: React.ReactNode
-}
-
-export function AdminLayout({ children }: AdminLayoutProps) {
+export function AdminLayout({ children }: { children: React.ReactNode }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const router = useRouter()
+
+useEffect(() => {
+  const token = getToken()
+
+  if (!token) {
+    router.replace("/login")
+  } else {
+    setLoading(false)  // ✅ false karo
+  }
+}, [])
+
+  // ✅ only block ONCE
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin h-10 w-10 border-b-2 border-black"></div>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Mobile Overlay */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/20">
+      
+      {/* Overlay */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
 
-      {/* Sidebar - Hidden on mobile unless open */}
-      <div className={cn(
-        "hidden md:block",
-        mobileMenuOpen && "block"
-      )}>
+      {/* Sidebar Desktop */}
+      <div className="hidden md:block">
         <Sidebar
           collapsed={sidebarCollapsed}
           onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
       </div>
 
-      {/* Mobile Sidebar */}
+      {/* Sidebar Mobile */}
       <div className={cn(
-        "fixed inset-y-0 left-0 z-40 md:hidden transition-transform duration-300",
+        "fixed inset-y-0 left-0 z-40 md:hidden transition-transform",
         mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <Sidebar
@@ -45,15 +62,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         />
       </div>
 
-      {/* Main Content */}
-      <div
-        className={cn(
-          "min-h-screen transition-all duration-300",
-          sidebarCollapsed ? "md:ml-[72px]" : "md:ml-64"
-        )}
-      >
+      {/* Content */}
+      <div className={cn(
+        "min-h-screen transition-all",
+        sidebarCollapsed ? "md:ml-[72px]" : "md:ml-64"
+      )}>
         <Header onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
-        <main className="p-4 md:p-6">
+        <main className="p-4 md:p-8">
           {children}
         </main>
       </div>

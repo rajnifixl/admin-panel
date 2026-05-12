@@ -1,0 +1,249 @@
+/* Editor Field Wrapper Styles */
+
+.editor-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.editor-field-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.editor-field-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.required-indicator {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.editor-field-hint {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.editor-field-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 0 4px;
+}
+
+.editor-field-stats {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat.error {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.editor-field-error {
+  font-size: 12px;
+  color: #ef4444;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.editor-field-error::before {
+  content: "⚠";
+  font-weight: 700;
+}
+
+.editor-field.error {
+  /* Error state styling */
+}
+
+.editor-field.error .editor-container {
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+
+.editor-field.error .editor-container:focus-within {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Excerpt Preview */
+.editor-field-excerpt {
+  padding: 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.excerpt-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  margin: 0 0 6px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.excerpt-text {
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .editor-field-label {
+    color: #f3f4f6;
+  }
+
+  .editor-field-hint {
+    color: #d1d5db;
+  }
+
+  .editor-field-stats {
+    color: #d1d5db;
+  }
+
+  .editor-field-error {
+    color: #fca5a5;
+  }
+
+  .editor-field.error .editor-container {
+    border-color: #7f1d1d;
+    background: #7f1d1d;
+  }
+
+  .editor-field.error .editor-container:focus-within {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  }
+
+  .editor-field-excerpt {
+    background: #111827;
+    border-color: #374151;
+  }
+
+  .excerpt-label {
+    color: #d1d5db;
+  }
+
+  .excerpt-text {
+    color: #e5e7eb;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .editor-field {
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .editor-field-label {
+    font-size: 13px;
+  }
+
+  .editor-field-hint {
+    font-size: 11px;
+  }
+
+  .editor-field-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .editor-field-stats {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .editor-field-excerpt {
+    padding: 10px;
+    margin-top: 6px;
+  }
+
+  .excerpt-label {
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+
+  .excerpt-text {
+    font-size: 12px;
+  }
+}
+
+/* Focus States */
+.editor-field:focus-within .editor-field-label {
+  color: #3b82f6;
+}
+
+@media (prefers-color-scheme: dark) {
+  .editor-field:focus-within .editor-field-label {
+    color: #60a5fa;
+  }
+}
+
+/* Disabled State */
+.editor-field[disabled] {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Success State */
+.editor-field.success .editor-container {
+  border-color: #10b981;
+}
+
+.editor-field.success .editor-container:focus-within {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Loading State */
+.editor-field.loading .editor-container {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.editor-field.loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e5e7eb;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}

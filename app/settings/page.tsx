@@ -1,7 +1,6 @@
 "use client"
 
 import { AdminLayout } from "@/components/admin/admin-layout"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -19,172 +18,205 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 export default function SettingsPage() {
   return (
     <AdminLayout>
-      <div className="space-y-6 max-w-4xl">
+      <div className="page-enter space-y-8 max-w-4xl">
         {/* Page Header */}
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-          <p className="text-muted-foreground">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-bold gradient-text">Settings</h1>
+          <p className="text-base text-muted-foreground">
             Manage your account and store preferences
           </p>
         </div>
 
         {/* Profile Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Profile</CardTitle>
-            <CardDescription>Update your personal information</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex items-center gap-4">
-              <Avatar className="h-16 w-16">
-                <AvatarFallback className="bg-primary text-primary-foreground text-xl">
+        <div className="card-premium p-8 space-y-8">
+          <div>
+            <h2 className="text-xl font-bold text-foreground mb-2">Profile</h2>
+            <p className="text-sm text-muted-foreground">Update your personal information</p>
+          </div>
+
+          {/* Avatar Section */}
+          <div className="flex items-center gap-6 pb-6 border-b border-border">
+            <div className="relative">
+              <Avatar className="h-20 w-20 ring-2 ring-primary/20">
+                <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-600 text-white text-2xl font-bold">
                   JD
                 </AvatarFallback>
               </Avatar>
-              <div>
-                <Button variant="outline" size="sm">Change Avatar</Button>
-              </div>
+              <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 rounded-full border-2 border-white"></div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" defaultValue="John" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" defaultValue="Doe" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" defaultValue="john@example.com" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
-                <Input id="phone" type="tel" defaultValue="+1 (555) 123-4567" />
-              </div>
+            <div className="flex-1">
+              <p className="font-semibold text-foreground mb-1">Profile Picture</p>
+              <p className="text-sm text-muted-foreground mb-3">JPG, PNG or GIF. Max 5MB</p>
+              <Button className="btn-premium bg-primary text-primary-foreground hover:bg-primary/90">
+                Change Avatar
+              </Button>
             </div>
-            <Button>Save Changes</Button>
-          </CardContent>
-        </Card>
+          </div>
+
+          {/* Form Fields */}
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="form-group">
+              <label htmlFor="firstName" className="form-label">First Name</label>
+              <input 
+                id="firstName" 
+                type="text"
+                defaultValue="John" 
+                className="form-input"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="lastName" className="form-label">Last Name</label>
+              <input 
+                id="lastName" 
+                type="text"
+                defaultValue="Doe" 
+                className="form-input"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="email" className="form-label">Email Address</label>
+              <input 
+                id="email" 
+                type="email" 
+                defaultValue="john@example.com" 
+                className="form-input"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="phone" className="form-label">Phone Number</label>
+              <input 
+                id="phone" 
+                type="tel" 
+                defaultValue="+1 (555) 123-4567" 
+                className="form-input"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-4">
+            <Button className="btn-gradient">Save Changes</Button>
+          </div>
+        </div>
 
         {/* Store Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Store Settings</CardTitle>
-            <CardDescription>Configure your store preferences</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="storeName">Store Name</Label>
-                <Input id="storeName" defaultValue="ShopAdmin Store" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="currency">Currency</Label>
-                <Select defaultValue="usd">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="usd">USD ($)</SelectItem>
-                    <SelectItem value="eur">EUR (&#8364;)</SelectItem>
-                    <SelectItem value="gbp">GBP (&#163;)</SelectItem>
-                    <SelectItem value="jpy">JPY (&#165;)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="timezone">Timezone</Label>
-                <Select defaultValue="america-new-york">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="america-new-york">America/New York</SelectItem>
-                    <SelectItem value="america-los-angeles">America/Los Angeles</SelectItem>
-                    <SelectItem value="europe-london">Europe/London</SelectItem>
-                    <SelectItem value="asia-tokyo">Asia/Tokyo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="language">Language</Label>
-                <Select defaultValue="en">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="es">Spanish</SelectItem>
-                    <SelectItem value="fr">French</SelectItem>
-                    <SelectItem value="de">German</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+        <div className="card-premium p-8 space-y-8">
+          <div>
+            <h2 className="text-xl font-bold text-foreground mb-2">Store Settings</h2>
+            <p className="text-sm text-muted-foreground">Configure your store preferences</p>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="form-group">
+              <label htmlFor="storeName" className="form-label">Store Name</label>
+              <input 
+                id="storeName" 
+                type="text"
+                defaultValue="ShopAdmin Store" 
+                className="form-input"
+              />
             </div>
-            <Button>Save Changes</Button>
-          </CardContent>
-        </Card>
+            <div className="form-group">
+              <label htmlFor="currency" className="form-label">Currency</label>
+              <select defaultValue="usd" className="form-select">
+                <option value="usd">USD ($)</option>
+                <option value="eur">EUR (€)</option>
+                <option value="gbp">GBP (£)</option>
+                <option value="jpy">JPY (¥)</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label htmlFor="timezone" className="form-label">Timezone</label>
+              <select defaultValue="america-new-york" className="form-select">
+                <option value="america-new-york">America/New York</option>
+                <option value="america-los-angeles">America/Los Angeles</option>
+                <option value="europe-london">Europe/London</option>
+                <option value="asia-tokyo">Asia/Tokyo</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label htmlFor="language" className="form-label">Language</label>
+              <select defaultValue="en" className="form-select">
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-4">
+            <Button className="btn-gradient">Save Changes</Button>
+          </div>
+        </div>
 
         {/* Notifications */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Notifications</CardTitle>
-            <CardDescription>Configure how you receive notifications</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Email Notifications</p>
-                <p className="text-sm text-muted-foreground">Receive order updates via email</p>
+        <div className="card-premium p-8 space-y-6">
+          <div>
+            <h2 className="text-xl font-bold text-foreground mb-2">Notifications</h2>
+            <p className="text-sm text-muted-foreground">Configure how you receive notifications</p>
+          </div>
+
+          <div className="space-y-4">
+            {/* Email Notifications */}
+            <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors">
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">Email Notifications</p>
+                <p className="text-xs text-muted-foreground mt-1">Receive order updates via email</p>
               </div>
-              <Switch defaultChecked />
+              <Switch defaultChecked className="ml-4" />
             </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Push Notifications</p>
-                <p className="text-sm text-muted-foreground">Receive push notifications for new orders</p>
+
+            {/* Push Notifications */}
+            <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors">
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">Push Notifications</p>
+                <p className="text-xs text-muted-foreground mt-1">Receive push notifications for new orders</p>
               </div>
-              <Switch defaultChecked />
+              <Switch defaultChecked className="ml-4" />
             </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Low Stock Alerts</p>
-                <p className="text-sm text-muted-foreground">Get notified when products are running low</p>
+
+            {/* Low Stock Alerts */}
+            <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors">
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">Low Stock Alerts</p>
+                <p className="text-xs text-muted-foreground mt-1">Get notified when products are running low</p>
               </div>
-              <Switch defaultChecked />
+              <Switch defaultChecked className="ml-4" />
             </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Marketing Emails</p>
-                <p className="text-sm text-muted-foreground">Receive tips and product updates</p>
+
+            {/* Marketing Emails */}
+            <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors">
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">Marketing Emails</p>
+                <p className="text-xs text-muted-foreground mt-1">Receive tips and product updates</p>
               </div>
-              <Switch />
+              <Switch className="ml-4" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Danger Zone */}
-        <Card className="border-destructive/50">
-          <CardHeader>
-            <CardTitle className="text-base text-destructive">Danger Zone</CardTitle>
-            <CardDescription>Irreversible and destructive actions</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Delete Store</p>
-                <p className="text-sm text-muted-foreground">
-                  Permanently delete your store and all data
-                </p>
-              </div>
-              <Button variant="destructive" size="sm">Delete Store</Button>
+        <div className="card-premium p-8 space-y-6 border-2 border-destructive/30 bg-destructive/5">
+          <div>
+            <h2 className="text-xl font-bold text-destructive mb-2">Danger Zone</h2>
+            <p className="text-sm text-muted-foreground">Irreversible and destructive actions</p>
+          </div>
+
+          <div className="flex items-center justify-between p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-destructive">Delete Store</p>
+              <p className="text-xs text-destructive/70 mt-1">
+                Permanently delete your store and all data. This action cannot be undone.
+              </p>
             </div>
-          </CardContent>
-        </Card>
+            <Button 
+              className="ml-4 bg-destructive text-destructive-foreground hover:bg-destructive/90 btn-premium"
+              size="sm"
+            >
+              Delete Store
+            </Button>
+          </div>
+        </div>
       </div>
     </AdminLayout>
   )

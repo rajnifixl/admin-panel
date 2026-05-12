@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation"
 import { AdminLayout } from "@/components/admin/admin-layout"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { RichTextEditor } from "@/components/editor/rich-text-editor"
 import { ArrowLeft, ImagePlus, X, GripVertical, Loader2, CheckCircle2, Star, RefreshCw, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -43,6 +44,28 @@ export default function EditProductPage() {
     brand: "",
     sku: "",
     bestseller: false,
+    paymentModeCOD: true,
+    paymentModeOnline: false,
+    discount: 0,
+    discountStartDate: "",
+    discountEndDate: "",
+    // ✅ Buy X Get Y
+    buyXGetYEnabled: false,
+    buyQuantity: 1,
+    getQuantity: 1,
+    // ✅ Flash Sale
+    flashSaleEnabled: false,
+    flashSaleTitle: "Flash Sale",
+    flashSaleEndTime: "",
+    flashSaleDiscount: 0,
+    // ✅ Category Discount
+    categoryDiscountEnabled: false,
+    categoryDiscountPercent: 0,
+    // ✅ Festive Sale
+    festiveSaleEnabled: false,
+    festiveSaleTitle: "Festive Sale",
+    festiveSaleDiscount: 0,
+    festiveSaleEndDate: "",
   })
 
   const getToken = () => localStorage.getItem("adminToken") || ""
@@ -68,6 +91,28 @@ export default function EditProductPage() {
             brand: product.brand || "",
             sku: product.sku || "",
             bestseller: product.bestseller || false,
+            paymentModeCOD: product.paymentMode === "cod" || product.paymentMode === "both" || true,
+            paymentModeOnline: product.paymentMode === "online" || product.paymentMode === "both" || false,
+            discount: product.discount || 0,
+            discountStartDate: product.discountStartDate || "",
+            discountEndDate: product.discountEndDate || "",
+            // ✅ Buy X Get Y
+            buyXGetYEnabled: product.buyXGetYEnabled || false,
+            buyQuantity: product.buyQuantity || 1,
+            getQuantity: product.getQuantity || 1,
+            // ✅ Flash Sale
+            flashSaleEnabled: product.flashSaleEnabled || false,
+            flashSaleTitle: product.flashSaleTitle || "Flash Sale",
+            flashSaleEndTime: product.flashSaleEndTime || "",
+            flashSaleDiscount: product.flashSaleDiscount || 0,
+            // ✅ Category Discount
+            categoryDiscountEnabled: product.categoryDiscountEnabled || false,
+            categoryDiscountPercent: product.categoryDiscountPercent || 0,
+            // ✅ Festive Sale
+            festiveSaleEnabled: product.festiveSaleEnabled || false,
+            festiveSaleTitle: product.festiveSaleTitle || "Festive Sale",
+            festiveSaleDiscount: product.festiveSaleDiscount || 0,
+            festiveSaleEndDate: product.festiveSaleEndDate || "",
           })
 
           // Set existing images
@@ -198,6 +243,43 @@ export default function EditProductPage() {
     formData.append("brand", form.brand)
     formData.append("sku", form.sku)
 
+    // Convert checkbox states to paymentMode string for backend compatibility
+    let paymentMode = "both"
+    if (form.paymentModeCOD && !form.paymentModeOnline) {
+      paymentMode = "cod"
+    } else if (!form.paymentModeCOD && form.paymentModeOnline) {
+      paymentMode = "online"
+    } else if (form.paymentModeCOD && form.paymentModeOnline) {
+      paymentMode = "both"
+    }
+    formData.append("paymentMode", paymentMode)
+
+    // Optional discount fields
+    formData.append("discount", String(form.discount))
+    if (form.discountStartDate) formData.append("discountStartDate", form.discountStartDate)
+    if (form.discountEndDate) formData.append("discountEndDate", form.discountEndDate)
+
+    // ✅ Buy X Get Y
+    formData.append("buyXGetYEnabled", String(form.buyXGetYEnabled))
+    formData.append("buyQuantity", String(form.buyQuantity))
+    formData.append("getQuantity", String(form.getQuantity))
+
+    // ✅ Flash Sale
+    formData.append("flashSaleEnabled", String(form.flashSaleEnabled))
+    formData.append("flashSaleTitle", form.flashSaleTitle)
+    if (form.flashSaleEndTime) formData.append("flashSaleEndTime", form.flashSaleEndTime)
+    formData.append("flashSaleDiscount", String(form.flashSaleDiscount))
+
+    // ✅ Category Discount
+    formData.append("categoryDiscountEnabled", String(form.categoryDiscountEnabled))
+    formData.append("categoryDiscountPercent", String(form.categoryDiscountPercent))
+
+    // ✅ Festive Sale
+    formData.append("festiveSaleEnabled", String(form.festiveSaleEnabled))
+    formData.append("festiveSaleTitle", form.festiveSaleTitle)
+    formData.append("festiveSaleDiscount", String(form.festiveSaleDiscount))
+    if (form.festiveSaleEndDate) formData.append("festiveSaleEndDate", form.festiveSaleEndDate)
+
     // Add new images only (not existing ones)
     let newImageCount = 0
     images.forEach((img) => {
@@ -218,7 +300,9 @@ export default function EditProductPage() {
       const token = getToken()
       const response = await fetch(`${BACKEND_URL}/api/product/update/${productId}`, {
         method: "PUT",
-        headers: { authorization: token },
+    headers: {
+   Authorization: `Bearer ${token}`,
+},
         body: formData,
       })
       const data = await response.json()
@@ -242,7 +326,9 @@ export default function EditProductPage() {
       const token = getToken()
       const response = await fetch(`${BACKEND_URL}/api/product/remove/${productId}`, {
         method: "DELETE",
-        headers: { authorization: token },
+        headers: {
+   Authorization: `Bearer ${token}`,
+},
       })
       const data = await response.json()
       if (data.success) {
@@ -394,16 +480,56 @@ export default function EditProductPage() {
             </div>
 
             <div style={{ marginBottom: 16 }}>
-              <label className="ep-label">Description</label>
-              <textarea className="ep-input" name="description" value={form.description} onChange={handleChange}
-                placeholder="Describe your product in detail..." rows={4}
-                style={{ resize: 'vertical', fontFamily: 'inherit' }} />
+              <RichTextEditor
+                label="Description"
+                value={form.description}
+                onChange={(newValue) => setForm(prev => ({ ...prev, description: newValue }))}
+                placeholder="Describe your product in detail..."
+                height={300}
+              />
             </div>
+
+            {/* Price Summary Section */}
+            {form.price && (
+              <div style={{
+                background: '#fdf8f0',
+                border: '1.5px solid #f0e6d0',
+                borderRadius: '12px',
+                padding: '16px',
+                marginBottom: 16,
+              }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: '#8b7355', letterSpacing: '0.3px', marginBottom: 12, textTransform: 'uppercase' }}>
+                  💰 Price Summary
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <div style={{ fontSize: 11, color: '#9b8878', marginBottom: 4 }}>Original Price</div>
+                    <div style={{ fontSize: 16, fontWeight: 700, color: '#2d2520' }}>₹{Number(form.price).toLocaleString('en-IN')}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, color: '#9b8878', marginBottom: 4 }}>Discount</div>
+                    <div style={{ fontSize: 16, fontWeight: 700, color: form.discount > 0 ? '#ef4444' : '#9b8878' }}>
+                      {form.discount > 0 ? `-₹${Math.round(Number(form.price) * form.discount / 100).toLocaleString('en-IN')} (${form.discount}%)` : 'No discount'}
+                    </div>
+                  </div>
+                  <div style={{ gridColumn: '1 / -1', paddingTop: 12, borderTop: '1px solid #e8e4df' }}>
+                    <div style={{ fontSize: 11, color: '#9b8878', marginBottom: 4 }}>Final Price</div>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: '#2d2520' }}>
+                      ₹{Math.round(Number(form.price) - (Number(form.price) * form.discount / 100)).toLocaleString('en-IN')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="ep-grid-4" style={{ marginBottom: 16 }}>
               <div>
                 <label className="ep-label">Price (₹) *</label>
                 <input className="ep-input" name="price" type="number" value={form.price} onChange={handleChange} placeholder="499" min="0" required />
+              </div>
+              <div>
+                <label className="ep-label">Discount (%)</label>
+                <input className="ep-input" name="discount" type="number" value={form.discount} onChange={handleChange} placeholder="0" min="0" max="100" />
               </div>
               <div>
                 <label className="ep-label">Stock</label>
@@ -413,10 +539,40 @@ export default function EditProductPage() {
                 <label className="ep-label">Brand</label>
                 <input className="ep-input" name="brand" value={form.brand} onChange={handleChange} placeholder="Nike" />
               </div>
+            </div>
+
+            {/* Discount Date Range */}
+            {form.discount > 0 && (
+              <div className="ep-grid-2" style={{ marginBottom: 16 }}>
+                <div>
+                  <label className="ep-label">Discount Start Date</label>
+                  <input 
+                    className="ep-input" 
+                    name="discountStartDate" 
+                    type="date" 
+                    value={form.discountStartDate} 
+                    onChange={handleChange} 
+                  />
+                </div>
+                <div>
+                  <label className="ep-label">Discount End Date</label>
+                  <input 
+                    className="ep-input" 
+                    name="discountEndDate" 
+                    type="date" 
+                    value={form.discountEndDate} 
+                    onChange={handleChange} 
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="ep-grid-2" style={{ marginBottom: 16 }}>
               <div>
                 <label className="ep-label">SKU</label>
                 <input className="ep-input" name="sku" value={form.sku} onChange={handleChange} placeholder="NK-001" />
               </div>
+              <div></div>
             </div>
 
             <div className="ep-grid-2">
@@ -461,6 +617,419 @@ export default function EditProductPage() {
               <p style={{ fontSize: 12, color: '#9b8878', marginTop: 10, marginBottom: 0 }}>
                 Selected: <strong style={{ color: '#6b5c48' }}>{selectedSizes.join(", ")}</strong>
               </p>
+            )}
+          </div>
+
+          {/* PAYMENT OPTIONS */}
+          <div className="ep-section">
+            <div className="ep-section-title">Payment Options</div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              
+              {/* COD Checkbox */}
+              <label style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '12px 16px',
+                background: form.paymentModeCOD ? '#fdf8f0' : '#faf8f5',
+                border: `1.5px solid ${form.paymentModeCOD ? '#f0e6d0' : '#e8e4df'}`,
+                borderRadius: '10px',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}>
+                <input
+                  type="checkbox"
+                  checked={form.paymentModeCOD}
+                  onChange={(e) => setForm(prev => ({ ...prev, paymentModeCOD: e.target.checked }))}
+                  style={{
+                    width: '18px',
+                    height: '18px',
+                    accentColor: '#8b7355',
+                    cursor: 'pointer',
+                  }}
+                />
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#2d2520' }}>💵 Cash on Delivery (COD)</div>
+                  <div style={{ fontSize: 12, color: '#9b8878', marginTop: 2 }}>Customer pays when order is delivered</div>
+                </div>
+              </label>
+
+              {/* Online Checkbox */}
+              <label style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '12px 16px',
+                background: form.paymentModeOnline ? '#fdf8f0' : '#faf8f5',
+                border: `1.5px solid ${form.paymentModeOnline ? '#f0e6d0' : '#e8e4df'}`,
+                borderRadius: '10px',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}>
+                <input
+                  type="checkbox"
+                  checked={form.paymentModeOnline}
+                  onChange={(e) => setForm(prev => ({ ...prev, paymentModeOnline: e.target.checked }))}
+                  style={{
+                    width: '18px',
+                    height: '18px',
+                    accentColor: '#8b7355',
+                    cursor: 'pointer',
+                  }}
+                />
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#2d2520' }}>💳 Online Payment</div>
+                  <div style={{ fontSize: 12, color: '#9b8878', marginTop: 2 }}>Credit/Debit card, UPI, and other digital methods</div>
+                </div>
+              </label>
+
+              {/* Selected Options Display */}
+              {(form.paymentModeCOD || form.paymentModeOnline) && (
+                <div style={{
+                  marginTop: 8,
+                  padding: '10px 12px',
+                  background: '#e8f5e9',
+                  border: '1px solid #4caf50',
+                  borderRadius: '8px',
+                  fontSize: 12,
+                  color: '#2e7d32',
+                  fontWeight: 500,
+                }}>
+                  ✓ Enabled: {[form.paymentModeCOD && 'COD', form.paymentModeOnline && 'Online'].filter(Boolean).join(' + ')}
+                </div>
+              )}
+
+              {!form.paymentModeCOD && !form.paymentModeOnline && (
+                <div style={{
+                  marginTop: 8,
+                  padding: '10px 12px',
+                  background: '#fff3e0',
+                  border: '1px solid #ff9800',
+                  borderRadius: '8px',
+                  fontSize: 12,
+                  color: '#e65100',
+                  fontWeight: 500,
+                }}>
+                  ⚠️ Select at least one payment option
+                </div>
+              )}
+
+            </div>
+          </div>
+
+          {/* ✅ BUY X GET Y OFFER */}
+          <div className="ep-section">
+            <div className="ep-section-title">🎁 Buy X Get Y Offer</div>
+            
+            <label style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '12px 16px',
+              background: form.buyXGetYEnabled ? '#fdf8f0' : '#faf8f5',
+              border: `1.5px solid ${form.buyXGetYEnabled ? '#f0e6d0' : '#e8e4df'}`,
+              borderRadius: '10px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              marginBottom: 16,
+            }}>
+              <input
+                type="checkbox"
+                checked={form.buyXGetYEnabled}
+                onChange={(e) => setForm(prev => ({ ...prev, buyXGetYEnabled: e.target.checked }))}
+                style={{
+                  width: '18px',
+                  height: '18px',
+                  accentColor: '#8b7355',
+                  cursor: 'pointer',
+                }}
+              />
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: '#2d2520' }}>Enable Buy X Get Y Offer</div>
+                <div style={{ fontSize: 12, color: '#9b8878', marginTop: 2 }}>e.g., Buy 2 Get 1 Free</div>
+              </div>
+            </label>
+
+            {form.buyXGetYEnabled && (
+              <div className="ep-grid-2" style={{ marginBottom: 16 }}>
+                <div>
+                  <label className="ep-label">Buy Quantity *</label>
+                  <input 
+                    className="ep-input" 
+                    type="number" 
+                    value={form.buyQuantity} 
+                    onChange={(e) => setForm(prev => ({ ...prev, buyQuantity: Math.max(1, parseInt(e.target.value) || 1) }))}
+                    placeholder="2" 
+                    min="1"
+                  />
+                </div>
+                <div>
+                  <label className="ep-label">Get Quantity *</label>
+                  <input 
+                    className="ep-input" 
+                    type="number" 
+                    value={form.getQuantity} 
+                    onChange={(e) => setForm(prev => ({ ...prev, getQuantity: Math.max(1, parseInt(e.target.value) || 1) }))}
+                    placeholder="1" 
+                    min="1"
+                  />
+                </div>
+              </div>
+            )}
+
+            {form.buyXGetYEnabled && (
+              <div style={{
+                padding: '12px 16px',
+                background: '#e8f5e9',
+                border: '1px solid #4caf50',
+                borderRadius: '8px',
+                fontSize: 13,
+                color: '#2e7d32',
+                fontWeight: 500,
+              }}>
+                ✓ Offer: Buy {form.buyQuantity} Get {form.getQuantity} Free
+              </div>
+            )}
+          </div>
+
+          {/* ✅ FLASH SALE / COUNTDOWN */}
+          <div className="ep-section">
+            <div className="ep-section-title">⚡ Flash Sale (Countdown)</div>
+            
+            <label style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '12px 16px',
+              background: form.flashSaleEnabled ? '#fdf8f0' : '#faf8f5',
+              border: `1.5px solid ${form.flashSaleEnabled ? '#f0e6d0' : '#e8e4df'}`,
+              borderRadius: '10px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              marginBottom: 16,
+            }}>
+              <input
+                type="checkbox"
+                checked={form.flashSaleEnabled}
+                onChange={(e) => setForm(prev => ({ ...prev, flashSaleEnabled: e.target.checked }))}
+                style={{
+                  width: '18px',
+                  height: '18px',
+                  accentColor: '#8b7355',
+                  cursor: 'pointer',
+                }}
+              />
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: '#2d2520' }}>Enable Flash Sale</div>
+                <div style={{ fontSize: 12, color: '#9b8878', marginTop: 2 }}>Show countdown timer on product</div>
+              </div>
+            </label>
+
+            {form.flashSaleEnabled && (
+              <>
+                <div className="ep-grid-2" style={{ marginBottom: 16 }}>
+                  <div>
+                    <label className="ep-label">Flash Sale Title *</label>
+                    <input 
+                      className="ep-input" 
+                      value={form.flashSaleTitle} 
+                      onChange={(e) => setForm(prev => ({ ...prev, flashSaleTitle: e.target.value }))}
+                      placeholder="Flash Sale" 
+                    />
+                  </div>
+                  <div>
+                    <label className="ep-label">Discount (%) *</label>
+                    <input 
+                      className="ep-input" 
+                      type="number" 
+                      value={form.flashSaleDiscount} 
+                      onChange={(e) => setForm(prev => ({ ...prev, flashSaleDiscount: Math.max(0, Math.min(100, parseInt(e.target.value) || 0)) }))}
+                      placeholder="20" 
+                      min="0"
+                      max="100"
+                    />
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: 16 }}>
+                  <label className="ep-label">Sale End Time *</label>
+                  <input 
+                    className="ep-input" 
+                    type="datetime-local" 
+                    value={form.flashSaleEndTime} 
+                    onChange={(e) => setForm(prev => ({ ...prev, flashSaleEndTime: e.target.value }))}
+                  />
+                  <p style={{ fontSize: 11, color: '#9b8878', marginTop: 4, marginBottom: 0 }}>
+                    Countdown timer will show on product card
+                  </p>
+                </div>
+
+                {form.flashSaleEndTime && (
+                  <div style={{
+                    padding: '12px 16px',
+                    background: '#e8f5e9',
+                    border: '1px solid #4caf50',
+                    borderRadius: '8px',
+                    fontSize: 13,
+                    color: '#2e7d32',
+                    fontWeight: 500,
+                  }}>
+                    ✓ {form.flashSaleTitle} - {form.flashSaleDiscount}% OFF until {new Date(form.flashSaleEndTime).toLocaleString()}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* ✅ CATEGORY DISCOUNT */}
+          <div className="ep-section">
+            <div className="ep-section-title">📂 Category Discount</div>
+            
+            <label style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '12px 16px',
+              background: form.categoryDiscountEnabled ? '#fdf8f0' : '#faf8f5',
+              border: `1.5px solid ${form.categoryDiscountEnabled ? '#f0e6d0' : '#e8e4df'}`,
+              borderRadius: '10px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              marginBottom: 16,
+            }}>
+              <input
+                type="checkbox"
+                checked={form.categoryDiscountEnabled}
+                onChange={(e) => setForm(prev => ({ ...prev, categoryDiscountEnabled: e.target.checked }))}
+                style={{
+                  width: '18px',
+                  height: '18px',
+                  accentColor: '#8b7355',
+                  cursor: 'pointer',
+                }}
+              />
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: '#2d2520' }}>Enable Category Discount</div>
+                <div style={{ fontSize: 12, color: '#9b8878', marginTop: 2 }}>Apply discount to entire category</div>
+              </div>
+            </label>
+
+            {form.categoryDiscountEnabled && (
+              <>
+                <div style={{ marginBottom: 16 }}>
+                  <label className="ep-label">Discount Percentage (%) *</label>
+                  <input 
+                    className="ep-input" 
+                    type="number" 
+                    value={form.categoryDiscountPercent} 
+                    onChange={(e) => setForm(prev => ({ ...prev, categoryDiscountPercent: Math.max(0, Math.min(100, parseInt(e.target.value) || 0)) }))}
+                    placeholder="15" 
+                    min="0"
+                    max="100"
+                  />
+                </div>
+
+                {form.categoryDiscountPercent > 0 && (
+                  <div style={{
+                    padding: '12px 16px',
+                    background: '#e8f5e9',
+                    border: '1px solid #4caf50',
+                    borderRadius: '8px',
+                    fontSize: 13,
+                    color: '#2e7d32',
+                    fontWeight: 500,
+                  }}>
+                    ✓ Category Discount: {form.categoryDiscountPercent}% OFF on all products in this category
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* ✅ FESTIVE SALE */}
+          <div className="ep-section">
+            <div className="ep-section-title">🎉 Festive Sale</div>
+            
+            <label style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '12px 16px',
+              background: form.festiveSaleEnabled ? '#fdf8f0' : '#faf8f5',
+              border: `1.5px solid ${form.festiveSaleEnabled ? '#f0e6d0' : '#e8e4df'}`,
+              borderRadius: '10px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              marginBottom: 16,
+            }}>
+              <input
+                type="checkbox"
+                checked={form.festiveSaleEnabled}
+                onChange={(e) => setForm(prev => ({ ...prev, festiveSaleEnabled: e.target.checked }))}
+                style={{
+                  width: '18px',
+                  height: '18px',
+                  accentColor: '#8b7355',
+                  cursor: 'pointer',
+                }}
+              />
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: '#2d2520' }}>Enable Festive Sale</div>
+                <div style={{ fontSize: 12, color: '#9b8878', marginTop: 2 }}>e.g., Diwali Sale, Christmas Sale</div>
+              </div>
+            </label>
+
+            {form.festiveSaleEnabled && (
+              <>
+                <div className="ep-grid-2" style={{ marginBottom: 16 }}>
+                  <div>
+                    <label className="ep-label">Festive Sale Title *</label>
+                    <input 
+                      className="ep-input" 
+                      value={form.festiveSaleTitle} 
+                      onChange={(e) => setForm(prev => ({ ...prev, festiveSaleTitle: e.target.value }))}
+                      placeholder="Diwali Sale" 
+                    />
+                  </div>
+                  <div>
+                    <label className="ep-label">Discount (%) *</label>
+                    <input 
+                      className="ep-input" 
+                      type="number" 
+                      value={form.festiveSaleDiscount} 
+                      onChange={(e) => setForm(prev => ({ ...prev, festiveSaleDiscount: Math.max(0, Math.min(100, parseInt(e.target.value) || 0)) }))}
+                      placeholder="25" 
+                      min="0"
+                      max="100"
+                    />
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: 16 }}>
+                  <label className="ep-label">Sale End Date *</label>
+                  <input 
+                    className="ep-input" 
+                    type="date" 
+                    value={form.festiveSaleEndDate} 
+                    onChange={(e) => setForm(prev => ({ ...prev, festiveSaleEndDate: e.target.value }))}
+                  />
+                </div>
+
+                {form.festiveSaleEndDate && (
+                  <div style={{
+                    padding: '12px 16px',
+                    background: '#e8f5e9',
+                    border: '1px solid #4caf50',
+                    borderRadius: '8px',
+                    fontSize: 13,
+                    color: '#2e7d32',
+                    fontWeight: 500,
+                  }}>
+                    ✓ {form.festiveSaleTitle} - {form.festiveSaleDiscount}% OFF until {new Date(form.festiveSaleEndDate).toLocaleString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}
+                  </div>
+                )}
+              </>
             )}
           </div>
 

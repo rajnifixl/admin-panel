@@ -14,7 +14,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { Search, MoreHorizontal, Plus, Package, Eye, Pencil, Trash2, Filter, RefreshCw, Loader2 } from "lucide-react"
+import { Search, MoreHorizontal, Plus, Package, Eye, Pencil, Trash2, Filter, RefreshCw, Loader2, ShoppingCart, AlertCircle, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
 import { authFetch, isLoggedIn } from "@/lib/api"
 
@@ -111,60 +111,88 @@ export default function ProductsPage() {
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Products</h1>
-            <p className="text-muted-foreground">Manage your product inventory</p>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900">Products</h1>
+            <p className="text-gray-600 mt-1">Manage your product inventory</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={fetchProducts}>
+            <Button variant="outline" onClick={fetchProducts} className="border-gray-200 hover:bg-gray-50 transition-colors duration-200">
               <RefreshCw className="mr-2 h-4 w-4" /> Refresh
             </Button>
             <Link href="/products/add">
-              <Button><Plus className="mr-2 h-4 w-4" />Add Product</Button>
+              <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"><Plus className="mr-2 h-4 w-4" />Add Product</Button>
             </Link>
           </div>
         </div>
 
         {/* Stats */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card className="hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="text-sm text-muted-foreground">Total Products</div>
-              <div className="text-2xl font-bold">{products.length}</div>
+          <Card className="shadow-sm hover:shadow-md transition-all duration-300 border-0 bg-gradient-to-br from-blue-50 to-indigo-50">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium text-gray-600">Total Products</div>
+                  <div className="text-3xl font-bold text-gray-900 mt-2">{products.length}</div>
+                </div>
+                <div className="p-3 bg-blue-100 rounded-xl">
+                  <Package className="h-6 w-6 text-blue-600" />
+                </div>
+              </div>
             </CardContent>
           </Card>
-          <Card className="hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="text-sm text-muted-foreground">In Stock</div>
-              <div className="text-2xl font-bold text-green-600">{products.filter(p => (p.stock ?? 50) > 10).length}</div>
+          <Card className="shadow-sm hover:shadow-md transition-all duration-300 border-0 bg-gradient-to-br from-emerald-50 to-teal-50">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium text-gray-600">In Stock</div>
+                  <div className="text-3xl font-bold text-emerald-600 mt-2">{products.filter(p => (p.stock ?? 50) > 10).length}</div>
+                </div>
+                <div className="p-3 bg-emerald-100 rounded-xl">
+                  <ShoppingCart className="h-6 w-6 text-emerald-600" />
+                </div>
+              </div>
             </CardContent>
           </Card>
-          <Card className="hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="text-sm text-muted-foreground">Low Stock</div>
-              <div className="text-2xl font-bold text-yellow-600">{products.filter(p => (p.stock ?? 50) > 0 && (p.stock ?? 50) <= 10).length}</div>
+          <Card className="shadow-sm hover:shadow-md transition-all duration-300 border-0 bg-gradient-to-br from-amber-50 to-orange-50">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium text-gray-600">Low Stock</div>
+                  <div className="text-3xl font-bold text-amber-600 mt-2">{products.filter(p => (p.stock ?? 50) > 0 && (p.stock ?? 50) <= 10).length}</div>
+                </div>
+                <div className="p-3 bg-amber-100 rounded-xl">
+                  <AlertCircle className="h-6 w-6 text-amber-600" />
+                </div>
+              </div>
             </CardContent>
           </Card>
-          <Card className="hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="text-sm text-muted-foreground">Out of Stock</div>
-              <div className="text-2xl font-bold text-red-600">{products.filter(p => (p.stock ?? 50) === 0).length}</div>
+          <Card className="shadow-sm hover:shadow-md transition-all duration-300 border-0 bg-gradient-to-br from-red-50 to-pink-50">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium text-gray-600">Out of Stock</div>
+                  <div className="text-3xl font-bold text-red-600 mt-2">{products.filter(p => (p.stock ?? 50) === 0).length}</div>
+                </div>
+                <div className="p-3 bg-red-100 rounded-xl">
+                  <AlertTriangle className="h-6 w-6 text-red-600" />
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Table */}
-        <Card className="shadow-sm">
-          <CardHeader className="pb-4">
+        <Card className="shadow-sm border-0 overflow-hidden">
+          <CardHeader className="pb-4 border-b border-gray-200/50">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <CardTitle className="text-base font-semibold">All Products</CardTitle>
+              <CardTitle className="text-lg font-semibold text-gray-900">All Products</CardTitle>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <div className="relative group">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-200" />
                   <Input placeholder="Search products..." value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)} className="pl-9 w-full sm:w-64" />
+                    onChange={e => setSearchQuery(e.target.value)} className="pl-9 w-full sm:w-64 bg-gray-50 border-gray-200 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-all duration-200 rounded-lg" />
                 </div>
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger className="w-full sm:w-40">
+                  <SelectTrigger className="w-full sm:w-40 bg-gray-50 border-gray-200 hover:bg-gray-100 transition-colors duration-200">
                     <Filter className="mr-2 h-4 w-4" />
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
@@ -179,65 +207,68 @@ export default function ProductsPage() {
 
           <CardContent className="p-0">
             {loading ? (
-              <div className="flex items-center justify-center py-12 text-muted-foreground">
+              <div className="flex items-center justify-center py-12 text-gray-500">
                 <RefreshCw className="mr-2 h-5 w-5 animate-spin" /> Loading...
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-y border-border bg-muted/50">
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Product</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground hidden md:table-cell">Category</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Price</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground hidden sm:table-cell">Stock</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Status</th>
-                      <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">Actions</th>
+                    <tr className="border-b border-gray-200/50 bg-gray-50/50">
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Product</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 hidden md:table-cell">Category</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Price</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 hidden sm:table-cell">Stock</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Status</th>
+                      <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-600">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
-                    {filteredProducts.map(product => {
+                  <tbody className="divide-y divide-gray-200/50">
+                    {filteredProducts.map((product, idx) => {
                       const stock = product.stock ?? 50
                       const stockInfo = getStockStatus(stock)
                       return (
-                        <tr key={product._id} className="hover:bg-muted/30 transition-colors">
-                          <td className="px-4 py-3">
+                        <tr key={product._id} className={`hover:bg-gray-50/50 transition-colors duration-200 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}`}>
+                          <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="h-10 w-10 rounded-lg bg-muted overflow-hidden flex-shrink-0">
+                              <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-gray-200 to-gray-300 overflow-hidden flex-shrink-0 shadow-sm">
                                 {product.image?.[0]
-                                  ? <img src={product.image[0]} alt={product.name} className="h-10 w-10 object-cover" />
-                                  : <Package className="h-5 w-5 text-muted-foreground m-auto mt-2.5" />}
+                                  ? <img src={product.image[0]} alt={product.name} className="h-12 w-12 object-cover" />
+                                  : <Package className="h-6 w-6 text-gray-400 m-auto mt-3" />}
                               </div>
-                              <span className="text-sm font-medium">{product.name}</span>
+                              <div>
+                                <p className="text-sm font-semibold text-gray-900">{product.name}</p>
+                                <p className="text-xs text-gray-500">ID: {product._id.slice(0, 8)}</p>
+                              </div>
                             </div>
                           </td>
-                          <td className="px-4 py-3 hidden md:table-cell">
-                            <Badge variant="secondary" className={categoryColors[product.category] || ""}>
+                          <td className="px-6 py-4 hidden md:table-cell">
+                            <Badge variant="secondary" className={`${categoryColors[product.category] || 'bg-gray-100 text-gray-700'} rounded-full`}>
                               {product.category}
                             </Badge>
                           </td>
-                          <td className="px-4 py-3 text-sm font-medium">₹{product.price}</td>
-                          <td className="px-4 py-3 text-sm hidden sm:table-cell">{stock} units</td>
-                          <td className="px-4 py-3">
-                            <Badge variant="secondary" className={stockInfo.color}>
+                          <td className="px-6 py-4 text-sm font-semibold text-gray-900">₹{product.price}</td>
+                          <td className="px-6 py-4 text-sm hidden sm:table-cell text-gray-600">{stock} units</td>
+                          <td className="px-6 py-4">
+                            <Badge variant="secondary" className={`${stockInfo.color} rounded-full`}>
                               {stockInfo.icon} {stockInfo.status}
                             </Badge>
                           </td>
-                          <td className="px-4 py-3 text-right">
+                          <td className="px-6 py-4 text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-100 transition-colors duration-200">
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => router.push(`/products/${product._id}`)}>
+                              <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuItem onClick={() => router.push(`/products/${product._id}`)} className="cursor-pointer hover:bg-gray-100 transition-colors duration-200">
                                   <Eye className="mr-2 h-4 w-4" /> View Details
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => router.push(`/products/edit/${product._id}`)}>
+                                <DropdownMenuItem onClick={() => router.push(`/products/edit/${product._id}`)} className="cursor-pointer hover:bg-gray-100 transition-colors duration-200">
                                   <Pencil className="mr-2 h-4 w-4" /> Edit Product
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="text-destructive" onClick={() => {
+                                <DropdownMenuItem className="text-red-600 cursor-pointer hover:bg-red-50 transition-colors duration-200" onClick={() => {
                                   setSelectedProduct(product)
                                   setShowDeleteModal(true)
                                 }}>
@@ -253,8 +284,12 @@ export default function ProductsPage() {
                 </table>
               </div>
             )}
-            <div className="flex items-center justify-between px-4 py-4 border-t border-border">
-              <p className="text-sm text-muted-foreground">Showing {filteredProducts.length} of {products.length} products</p>
+            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200/50 bg-gray-50/30">
+              <p className="text-sm text-gray-600">Showing <span className="font-semibold">{filteredProducts.length}</span> of <span className="font-semibold">{products.length}</span> products</p>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="border-gray-200 hover:bg-gray-100 transition-colors duration-200">Previous</Button>
+                <Button variant="outline" size="sm" className="border-gray-200 hover:bg-gray-100 transition-colors duration-200">Next</Button>
+              </div>
             </div>
           </CardContent>
         </Card>

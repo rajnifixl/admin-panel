@@ -24,27 +24,34 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:500
 const STATUS_FLOW = {
   'Pending': ['Confirmed', 'Cancelled'],
   'Confirmed': ['Shipped', 'Cancelled'],
-  'Shipped': ['Delivered'],
-  'Delivered': [],
+  'Shipped': ['Out for Delivery'],
+  'Out for Delivery': ['Delivered'],
+  'Delivered': ['Return Requested'],
   'Cancelled': [],
-  'Return Requested': [],
+  'Return Requested': ['Returned'],
   'Returned': [],
 }
 
 const statusStyles: Record<string, string> = {
-  "Pending":      "bg-yellow-100 text-yellow-800",
-  "Confirmed":    "bg-blue-100 text-blue-800",
-  "Shipped":      "bg-purple-100 text-purple-800",
-  "Delivered":    "bg-green-100 text-green-800",
-  "Cancelled":    "bg-red-100 text-red-800",
+  "Pending":          "bg-yellow-100 text-yellow-800",
+  "Confirmed":        "bg-blue-100 text-blue-800",
+  "Shipped":          "bg-purple-100 text-purple-800",
+  "Out for Delivery": "bg-indigo-100 text-indigo-800",
+  "Delivered":        "bg-green-100 text-green-800",
+  "Cancelled":        "bg-red-100 text-red-800",
+  "Return Requested": "bg-orange-100 text-orange-800",
+  "Returned":         "bg-gray-100 text-gray-800",
 }
 
 const statusOptions = [
   "Pending",
   "Confirmed",
   "Shipped",
+  "Out for Delivery",
   "Delivered",
   "Cancelled",
+  "Return Requested",
+  "Returned",
 ]
 
 export default function OrdersPage() {
@@ -129,15 +136,15 @@ export default function OrdersPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 page-enter">
 
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Orders</h1>
-            <p className="text-muted-foreground">Manage and track all customer orders</p>
+            <h1 className="text-3xl font-bold tracking-tight gradient-text">Orders</h1>
+            <p className="text-muted-foreground mt-1">Manage and track all customer orders</p>
           </div>
-          <Button onClick={fetchOrders} variant="outline" className="w-full sm:w-auto">
+          <Button onClick={fetchOrders} variant="outline" className="w-full sm:w-auto btn-premium">
             <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
@@ -145,54 +152,74 @@ export default function OrdersPage() {
 
         {/* Stats Cards */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-sm text-muted-foreground">Total Orders</div>
-              <div className="text-2xl font-bold">{orders.length}</div>
+          <div className="stat-card stat-card-blue">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Total Orders</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">{orders.length}</p>
+                </div>
+                <Package className="h-12 w-12 text-blue-500/20" />
+              </div>
             </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-sm text-muted-foreground">Pending / Packing</div>
-              <div className="text-2xl font-bold text-yellow-600">{pending}</div>
+          </div>
+          <div className="stat-card stat-card-orange">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Pending / Packing</p>
+                  <p className="text-3xl font-bold text-orange-600 mt-2">{pending}</p>
+                </div>
+                <AlertCircle className="h-12 w-12 text-orange-500/20" />
+              </div>
             </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-sm text-muted-foreground">Shipped</div>
-              <div className="text-2xl font-bold text-purple-600">{shipped}</div>
+          </div>
+          <div className="stat-card stat-card-purple">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Shipped</p>
+                  <p className="text-3xl font-bold text-purple-600 mt-2">{shipped}</p>
+                </div>
+                <Package className="h-12 w-12 text-purple-500/20" />
+              </div>
             </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-sm text-muted-foreground">Delivered</div>
-              <div className="text-2xl font-bold text-green-600">{delivered}</div>
+          </div>
+          <div className="stat-card stat-card-emerald">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Delivered</p>
+                  <p className="text-3xl font-bold text-emerald-600 mt-2">{delivered}</p>
+                </div>
+                <Package className="h-12 w-12 text-emerald-500/20" />
+              </div>
             </CardContent>
-          </Card>
+          </div>
         </div>
 
         {/* Orders Table */}
-        <Card>
-          <CardHeader className="pb-4">
+        <Card className="card-premium">
+          <CardHeader className="pb-4 border-b border-gray-200/50">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <CardTitle className="text-base font-semibold">
+              <CardTitle className="text-lg font-bold text-gray-900">
                 All Orders
-                <span className="ml-2 text-sm font-normal text-muted-foreground">
-                  (Total Revenue: ${totalRevenue.toFixed(2)})
+                <span className="ml-2 text-sm font-normal text-gray-600">
+                  (Revenue: <span className="text-emerald-600 font-semibold">${totalRevenue.toFixed(2)}</span>)
                 </span>
               </CardTitle>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                   <Input
                     placeholder="Search orders..."
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
-                    className="pl-9 w-full sm:w-64"
+                    className="pl-9 w-full sm:w-64 input-premium"
                   />
                 </div>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-full sm:w-44">
+                  <SelectTrigger className="w-full sm:w-44 input-premium">
                     <Filter className="mr-2 h-4 w-4" />
                     <SelectValue placeholder="Filter status" />
                   </SelectTrigger>
@@ -209,46 +236,46 @@ export default function OrdersPage() {
 
           <CardContent className="p-0">
             {loading ? (
-              <div className="flex items-center justify-center py-20 text-muted-foreground">
+              <div className="flex items-center justify-center py-20 text-gray-500">
                 <RefreshCw className="mr-2 h-5 w-5 animate-spin" />
                 Loading orders...
               </div>
             ) : filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+              <div className="flex flex-col items-center justify-center py-20 text-gray-500">
                 <Package className="h-12 w-12 mb-4 opacity-30" />
                 <p className="text-lg font-medium">No orders found</p>
                 <p className="text-sm">Try adjusting your filters</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="table-premium">
                   <thead>
-                    <tr className="border-y border-border bg-muted/50">
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Order ID</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Customer</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground hidden md:table-cell">Items</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground hidden lg:table-cell">Date</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Amount</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Payment</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Status</th>
+                    <tr>
+                      <th>Order ID</th>
+                      <th>Customer</th>
+                      <th className="hidden md:table-cell">Items</th>
+                      <th className="hidden lg:table-cell">Date</th>
+                      <th>Amount</th>
+                      <th>Payment</th>
+                      <th>Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
+                  <tbody>
                     {filtered.map(order => (
-                      <tr key={order._id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => router.push(`/orders/${order._id}`)}>
-                        <td className="px-4 py-3">
-                          <span className="text-xs font-mono text-primary hover:underline">
+                      <tr key={order._id} className="hover-lift cursor-pointer" onClick={() => router.push(`/orders/${order._id}`)}>
+                        <td>
+                          <span className="text-xs font-mono text-blue-600 hover:underline font-semibold">
                             #{order._id.slice(-8).toUpperCase()}
                           </span>
                         </td>
-                        <td className="px-4 py-3">
-                          <p className="text-sm font-medium">
+                        <td>
+                          <p className="text-sm font-semibold text-gray-900">
                             {order.address?.firstName} {order.address?.lastName}
                           </p>
-                          <p className="text-xs text-muted-foreground">{order.address?.email}</p>
+                          <p className="text-xs text-gray-500">{order.address?.email}</p>
                         </td>
-                        <td className="px-4 py-3 hidden md:table-cell">
-                          <div className="text-xs text-muted-foreground max-w-[200px]">
+                        <td className="hidden md:table-cell">
+                          <div className="text-xs text-gray-600 max-w-[200px]">
                             {order.items?.map((item: any, i: number) => (
                               <span key={i}>
                                 {item.name} x{item.quantity}
@@ -257,28 +284,28 @@ export default function OrdersPage() {
                             ))}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-xs text-muted-foreground hidden lg:table-cell">
+                        <td className="text-xs text-gray-600 hidden lg:table-cell">
                           {new Date(order.date).toLocaleDateString('en-IN', {
                             day: '2-digit', month: 'short', year: 'numeric'
                           })}
                         </td>
-                        <td className="px-4 py-3 text-sm font-semibold">
+                        <td className="text-sm font-bold text-gray-900">
                           ${order.amount?.toFixed(2)}
                         </td>
-                        <td className="px-4 py-3">
-                          <Badge variant="outline" className="text-xs">
+                        <td>
+                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
                             {order.paymentMethod || "COD"}
                           </Badge>
                         </td>
-                        <td className="px-4 py-3">
+                        <td>
                           <Select
                             value={order.status}
                             onValueChange={val => updateStatus(order._id, val)}
                             disabled={updatingId === order._id}
                           >
-                            <SelectTrigger className="h-8 w-44 text-xs">
+                            <SelectTrigger className="h-8 w-44 text-xs input-premium">
                               <SelectValue>
-                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusStyles[order.status] || "bg-gray-100 text-gray-700"}`}>
+                                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${statusStyles[order.status] || "bg-gray-100 text-gray-700"}`}>
                                   {order.status}
                                 </span>
                               </SelectValue>
@@ -308,9 +335,9 @@ export default function OrdersPage() {
               </div>
             )}
 
-            <div className="flex items-center justify-between px-4 py-4 border-t border-border">
-              <p className="text-sm text-muted-foreground">
-                Showing {filtered.length} of {orders.length} orders
+            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200/50 bg-gray-50/50">
+              <p className="text-sm text-gray-600 font-medium">
+                Showing <span className="font-bold text-gray-900">{filtered.length}</span> of <span className="font-bold text-gray-900">{orders.length}</span> orders
               </p>
             </div>
           </CardContent>

@@ -15,10 +15,10 @@ import { toast } from "sonner"
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"
 
 const COLORS = [
-  "var(--color-chart-1, #6366f1)",
-  "var(--color-chart-2, #22c55e)",
+  "var(--color-chart-1, #3b82f6)",
+  "var(--color-chart-2, #10b981)",
   "var(--color-chart-3, #f59e0b)",
-  "var(--color-chart-4, #ef4444)",
+  "var(--color-chart-4, #8b5cf6)",
 ]
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
@@ -120,56 +120,76 @@ export default function AnalyticsPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-8 page-enter">
 
-        {/* Header */}
+        {/* Header with Gradient Text */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Analytics</h1>
-            <p className="text-muted-foreground">Real-time insights from your store data</p>
+            <h1 className="text-4xl font-bold tracking-tight gradient-text">Analytics</h1>
+            <p className="text-muted-foreground mt-2">Real-time insights from your store data</p>
           </div>
-          <Button onClick={fetchOrders} variant="outline">
+          <Button 
+            onClick={fetchOrders} 
+            className="btn-gradient w-fit"
+            disabled={loading}
+          >
             <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-            Refresh
+            {loading ? "Refreshing..." : "Refresh"}
           </Button>
         </div>
 
         {/* Key Metrics — REAL */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-sm text-muted-foreground">Total Revenue</div>
-              <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
-              <div className="text-xs text-green-500">Live from DB ✓</div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Total Revenue - Blue */}
+          <Card className="stat-card stat-card-blue border-0">
+            <CardContent className="p-6">
+              <div className="flex flex-col gap-3">
+                <div className="text-sm font-medium text-slate-600">Total Revenue</div>
+                <div className="text-3xl font-bold text-slate-900">${totalRevenue.toFixed(2)}</div>
+                <div className="text-xs text-blue-600 font-medium">Live from DB ✓</div>
+              </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-sm text-muted-foreground">Total Orders</div>
-              <div className="text-2xl font-bold">{orders.length}</div>
-              <div className="text-xs text-green-500">Live from DB ✓</div>
+
+          {/* Total Orders - Emerald */}
+          <Card className="stat-card stat-card-emerald border-0">
+            <CardContent className="p-6">
+              <div className="flex flex-col gap-3">
+                <div className="text-sm font-medium text-slate-600">Total Orders</div>
+                <div className="text-3xl font-bold text-slate-900">{orders.length}</div>
+                <div className="text-xs text-emerald-600 font-medium">Live from DB ✓</div>
+              </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-sm text-muted-foreground">Delivered</div>
-              <div className="text-2xl font-bold text-green-600">{deliveredOrders}</div>
-              <div className="text-xs text-muted-foreground">Pending: {pendingOrders}</div>
+
+          {/* Delivered Orders - Orange */}
+          <Card className="stat-card stat-card-orange border-0">
+            <CardContent className="p-6">
+              <div className="flex flex-col gap-3">
+                <div className="text-sm font-medium text-slate-600">Delivered Orders</div>
+                <div className="text-3xl font-bold text-slate-900">{deliveredOrders}</div>
+                <div className="text-xs text-orange-600 font-medium">Pending: {pendingOrders}</div>
+              </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-sm text-muted-foreground">Avg. Order Value</div>
-              <div className="text-2xl font-bold">${avgOrderValue.toFixed(2)}</div>
-              <div className="text-xs text-green-500">Live from DB ✓</div>
+
+          {/* Avg Order Value - Purple */}
+          <Card className="stat-card stat-card-purple border-0">
+            <CardContent className="p-6">
+              <div className="flex flex-col gap-3">
+                <div className="text-sm font-medium text-slate-600">Avg. Order Value</div>
+                <div className="text-3xl font-bold text-slate-900">${avgOrderValue.toFixed(2)}</div>
+                <div className="text-xs text-purple-600 font-medium">Live from DB ✓</div>
+              </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Revenue & Orders Trend — REAL */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base font-semibold">Revenue & Orders Trend (Last 6 Months)</CardTitle>
+        <Card className="card-premium border-0">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg font-semibold text-slate-900">Revenue & Orders Trend</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">Last 6 months performance</p>
           </CardHeader>
           <CardContent>
             <div className="h-[350px]">
@@ -177,8 +197,8 @@ export default function AnalyticsPage() {
                 <AreaChart data={revenueByMonth}>
                   <defs>
                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
@@ -191,7 +211,7 @@ export default function AnalyticsPage() {
                     contentStyle={{ backgroundColor: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: "8px" }}
                     formatter={(v: number) => [`$${v.toFixed(2)}`, "Revenue"]}
                   />
-                  <Area type="monotone" dataKey="sales" stroke="#6366f1" strokeWidth={2} fill="url(#colorRevenue)" />
+                  <Area type="monotone" dataKey="sales" stroke="#3b82f6" strokeWidth={2} fill="url(#colorRevenue)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -199,17 +219,19 @@ export default function AnalyticsPage() {
         </Card>
 
         {/* Daily Orders + Category */}
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-2">
 
           {/* Daily Orders — REAL */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base font-semibold">Daily Orders (Last 7 Days)</CardTitle>
+          <Card className="card-premium border-0">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-semibold text-slate-900">Daily Orders</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">Last 7 days activity</p>
             </CardHeader>
             <CardContent>
               <div className="h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={dailyOrders}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
                     <XAxis dataKey="day" axisLine={false} tickLine={false}
                       tick={{ fill: "var(--color-muted-foreground)", fontSize: 12 }} />
                     <YAxis axisLine={false} tickLine={false}
@@ -217,7 +239,7 @@ export default function AnalyticsPage() {
                     <Tooltip
                       contentStyle={{ backgroundColor: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: "8px" }}
                     />
-                    <Bar dataKey="orders" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="orders" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -225,9 +247,10 @@ export default function AnalyticsPage() {
           </Card>
 
           {/* Orders by Status — REAL */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base font-semibold">Orders by Status</CardTitle>
+          <Card className="card-premium border-0">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-semibold text-slate-900">Orders by Status</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">Distribution across statuses</p>
             </CardHeader>
             <CardContent>
               <div className="h-[200px]">
@@ -245,12 +268,12 @@ export default function AnalyticsPage() {
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <div className="mt-4 grid grid-cols-2 gap-2">
+              <div className="mt-6 grid grid-cols-2 gap-3">
                 {ordersByStatus.map((item, i) => (
-                  <div key={i} className="flex items-center gap-2">
+                  <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-slate-50">
                     <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                    <span className="text-xs text-muted-foreground truncate">{item.name}</span>
-                    <span className="ml-auto text-xs font-medium">{item.value}</span>
+                    <span className="text-xs text-muted-foreground truncate flex-1">{item.name}</span>
+                    <span className="text-xs font-semibold text-slate-900">{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -260,14 +283,16 @@ export default function AnalyticsPage() {
 
         {/* Orders by Category — REAL */}
         {ordersByCategory.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base font-semibold">Orders by Category</CardTitle>
+          <Card className="card-premium border-0">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-semibold text-slate-900">Orders by Category</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">Product category breakdown</p>
             </CardHeader>
             <CardContent>
               <div className="h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={ordersByCategory} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
                     <XAxis type="number" axisLine={false} tickLine={false}
                       tick={{ fill: "var(--color-muted-foreground)", fontSize: 12 }} />
                     <YAxis type="category" dataKey="name" axisLine={false} tickLine={false}
@@ -275,7 +300,7 @@ export default function AnalyticsPage() {
                     <Tooltip
                       contentStyle={{ backgroundColor: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: "8px" }}
                     />
-                    <Bar dataKey="value" fill="#22c55e" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="value" fill="#10b981" radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

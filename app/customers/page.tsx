@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Search, RefreshCw, Users, ChevronRight } from "lucide-react"
+import { Search, RefreshCw, Users, ChevronRight, Package } from "lucide-react"
 import { toast } from "sonner"
 import { authFetch, isLoggedIn } from "@/lib/api"
 
@@ -65,59 +65,74 @@ export default function CustomersPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 page-enter">
 
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Customers</h1>
-            <p className="text-muted-foreground">Manage your customer base</p>
+            <h1 className="text-3xl font-bold tracking-tight gradient-text">Customers</h1>
+            <p className="text-gray-600 mt-1">Manage your customer base</p>
           </div>
-          <Button onClick={fetchCustomers} variant="outline">
+          <Button onClick={fetchCustomers} variant="outline" className="w-full sm:w-auto btn-premium">
             <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
         </div>
 
         {/* Stats */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-sm text-muted-foreground">Total Customers</div>
-              <div className="text-2xl font-bold">{customers.length}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-sm text-muted-foreground">Total Orders</div>
-              <div className="text-2xl font-bold">
-                {customers.reduce((sum, c) => sum + (c.totalOrders || 0), 0)}
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="stat-card stat-card-blue">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Total Customers</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">{customers.length}</p>
+                </div>
+                <Users className="h-12 w-12 text-blue-500/20" />
               </div>
             </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-sm text-muted-foreground">Avg Orders / Customer</div>
-              <div className="text-2xl font-bold">
-                {customers.length > 0
-                  ? (customers.reduce((sum, c) => sum + (c.totalOrders || 0), 0) / customers.length).toFixed(1)
-                  : "0"}
+          </div>
+          <div className="stat-card stat-card-purple">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Total Orders</p>
+                  <p className="text-3xl font-bold text-purple-600 mt-2">
+                    {customers.reduce((sum, c) => sum + (c.totalOrders || 0), 0)}
+                  </p>
+                </div>
+                <Package className="h-12 w-12 text-purple-500/20" />
               </div>
             </CardContent>
-          </Card>
+          </div>
+          <div className="stat-card stat-card-orange">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Avg Orders / Customer</p>
+                  <p className="text-3xl font-bold text-orange-600 mt-2">
+                    {customers.length > 0
+                      ? (customers.reduce((sum, c) => sum + (c.totalOrders || 0), 0) / customers.length).toFixed(1)
+                      : "0"}
+                  </p>
+                </div>
+                <ChevronRight className="h-12 w-12 text-orange-500/20" />
+              </div>
+            </CardContent>
+          </div>
         </div>
 
         {/* Table */}
-        <Card>
-          <CardHeader className="pb-4">
+        <Card className="card-premium">
+          <CardHeader className="pb-4 border-b border-gray-200/50">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <CardTitle className="text-base font-semibold">All Customers</CardTitle>
+              <CardTitle className="text-lg font-bold text-gray-900">All Customers</CardTitle>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 {/* Filter Type Dropdown */}
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value as "all" | "name" | "email")}
-                  className="px-3 py-2 rounded-md border border-border bg-background text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
+                  className="px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 hover:bg-gray-100 transition-colors input-premium"
                 >
                   <option value="all">All Fields</option>
                   <option value="name">By Name</option>
@@ -126,12 +141,12 @@ export default function CustomersPage() {
 
                 {/* Search Input */}
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                   <Input
                     placeholder={`Search customers${filterType !== "all" ? ` by ${filterType}` : ""}...`}
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
-                    className="pl-9 w-full sm:w-64"
+                    className="pl-9 w-full sm:w-64 input-premium"
                   />
                 </div>
               </div>
@@ -140,56 +155,56 @@ export default function CustomersPage() {
 
           <CardContent className="p-0">
             {loading ? (
-              <div className="flex items-center justify-center py-16 text-muted-foreground">
+              <div className="flex items-center justify-center py-16 text-gray-500">
                 <RefreshCw className="mr-2 h-5 w-5 animate-spin" />
                 Loading customers...
               </div>
             ) : filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+              <div className="flex flex-col items-center justify-center py-16 text-gray-500">
                 <Users className="h-12 w-12 mb-4 opacity-30" />
                 <p className="text-lg font-medium">No customers found</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="table-premium">
                   <thead>
-                    <tr className="border-y border-border bg-muted/50">
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Customer</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground hidden md:table-cell">Email</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground hidden lg:table-cell">Joined</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Orders</th>
+                    <tr>
+                      <th>Customer</th>
+                      <th className="hidden md:table-cell">Email</th>
+                      <th className="hidden lg:table-cell">Joined</th>
+                      <th>Total Orders</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
+                  <tbody>
                     {filtered.map(customer => (
                       <tr 
                         key={customer._id} 
                         onClick={() => handleCustomerClick(customer._id)}
-                        className="hover:bg-muted/50 transition-colors cursor-pointer"
+                        className="hover-lift cursor-pointer"
                       >
-                        <td className="px-4 py-3">
+                        <td>
                           <div className="flex items-center gap-3">
-                            <Avatar className="h-9 w-9">
-                              <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                            <Avatar className="h-9 w-9 bg-gradient-to-br from-blue-400 to-blue-600">
+                              <AvatarFallback className="bg-gradient-to-br from-blue-400 to-blue-600 text-white text-sm font-bold">
                                 {customer.name?.split(" ").map((n: string) => n[0]).join("") || "?"}
                               </AvatarFallback>
                             </Avatar>
-                            <span className="text-sm font-medium">{customer.name}</span>
+                            <span className="text-sm font-semibold text-gray-900">{customer.name}</span>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-sm text-muted-foreground hidden md:table-cell">
+                        <td className="text-sm text-gray-600 hidden md:table-cell">
                           {customer.email}
                         </td>
-                        <td className="px-4 py-3 text-sm text-muted-foreground hidden lg:table-cell">
+                        <td className="text-sm text-gray-600 hidden lg:table-cell">
                           {customer.createdAt
                             ? new Date(customer.createdAt).toLocaleDateString('en-IN', {
                                 day: '2-digit', month: 'short', year: 'numeric'
                               })
                             : "—"}
                         </td>
-                        <td className="px-4 py-3 text-sm font-semibold flex items-center justify-between">
-                          <span>{customer.totalOrders || 0}</span>
-                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        <td className="text-sm font-bold text-gray-900 flex items-center justify-between">
+                          <span className="badge-info">{customer.totalOrders || 0} orders</span>
+                          <ChevronRight className="h-4 w-4 text-gray-400" />
                         </td>
                       </tr>
                     ))}
@@ -198,9 +213,9 @@ export default function CustomersPage() {
               </div>
             )}
 
-            <div className="flex items-center px-4 py-4 border-t border-border">
-              <p className="text-sm text-muted-foreground">
-                Showing {filtered.length} of {customers.length} customers
+            <div className="flex items-center px-6 py-4 border-t border-gray-200/50 bg-gray-50/50">
+              <p className="text-sm text-gray-600 font-medium">
+                Showing <span className="font-bold text-gray-900">{filtered.length}</span> of <span className="font-bold text-gray-900">{customers.length}</span> customers
               </p>
             </div>
           </CardContent>

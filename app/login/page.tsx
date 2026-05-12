@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,24 +8,58 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "sonner"
 import { Lock, Mail } from "lucide-react"
+// import { setToken, getToken } from "@/lib/api"
+// ✅ Yeh karo - setToken add karo
+import { authFetch, getToken, setToken } from "@/lib/api"
 
 export default function LoginPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [redirecting, setRedirecting] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
+  // ✅ Safe redirect - only run once after mount
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+
+    const token = getToken()
+    if (token) {
+      router.replace("/dashboard")
+    }
+  }, [mounted, router])
   const handleLogin = async (e: React.FormEvent) => {
+    console.log("🔘 Login button clicked")
     e.preventDefault()
+    console.log("✅ Form prevented default")
 
     if (!email || !password) {
+      console.log("❌ Validation failed: email or password empty")
       toast.error("Please fill in all fields")
       return
     }
+    console.log("✅ Validation passed")
 
     setLoading(true)
+    console.log("🔄 Loading state set to true")
+
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL
+      console.log("🔗 Backend URL:", backendUrl)
+      
+      if (!backendUrl) {
+        console.error("❌ NEXT_PUBLIC_BACKEND_URL is not defined!")
+        toast.error("Configuration error: Backend URL not set")
+        setLoading(false)
+        return
+      }
+
+      console.log("📡 Sending login request to:", `${backendUrl}/api/user/admin`)
       const response = await fetch(`${backendUrl}/api/user/admin`, {
         method: "POST",
         headers: {
@@ -34,27 +68,50 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       })
 
-      const data = await response.json()
+      console.log("📥 Response status:", response.status)
+      console.log("📥 Response ok:", response.ok)
 
-      if (data.success) {
-        // Save token to localStorage
-        localStorage.setItem("adminToken", data.token)
-        // Also set cookie for server-side middleware
-        document.cookie = `adminToken=${data.token}; path=/; max-age=86400`
-        toast.success("✅ Login successful!")
+      const data = await response.json()
+      console.log("📋 Full API Response:", data)
+      console.log("  - success:", data.success)
+      console.log("  - message:", data.message)
+      console.log("  - token exists:", !!data.token)
+      console.log("  - token length:", data.token?.length || 0)
+
+      if (data.success && data.token) {
+        console.log("✅ Login successful!")
+        console.log("💾 Token to save:", data.token.substring(0, 20) + "...")
         
-        // Redirect to dashboard
-        setTimeout(() => router.push("/"), 1500)
+        // Save token using unified helper
+        setToken(data.token)
+        console.log("✅ Token saved via setToken()")
+        
+        // Verify token was saved
+        const savedToken = getToken()
+        console.log("🔍 Token in localStorage:", savedToken ? savedToken.substring(0, 20) + "..." : "NULL!")
+        
+        toast.success("✅ Login successful!")
+        setRedirecting(true)
+        console.log("🚀 Redirecting to dashboard...")
+        
+        // Use replace instead of push to avoid history stack issues
+        router.replace("/dashboard")
       } else {
+        console.error("❌ Login failed:", data.message)
         toast.error(data.message || "Login failed")
       }
     } catch (error) {
-      console.error("Login error:", error)
-      toast.error("Failed to login")
+      console.error("❌ Catch block error:", error)
+      console.error("  - Error message:", (error as Error).message)
+      toast.error("Failed to login: " + (error as Error).message)
     } finally {
       setLoading(false)
+      console.log("🔄 Loading state set to false")
     }
   }
+
+  // Debug: Check if token exists on mount (for testing)
+  console.log("🔍 Current token on page load:", getToken() ? getToken().substring(0, 20) + "..." : "No token")
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-4">
@@ -77,7 +134,10 @@ export default function LoginPage() {
                   type="email"
                   placeholder="admin@shop.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    console.log("📝 Email changed:", e.target.value)
+                    setEmail(e.target.value)
+                  }}
                   className="pl-10"
                   required
                 />
@@ -94,7 +154,10 @@ export default function LoginPage() {
                   type="password"
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    console.log("📝 Password changed: [hidden]")
+                    setPassword(e.target.value)
+                  }}
                   className="pl-10"
                   required
                 />
@@ -102,8 +165,8 @@ export default function LoginPage() {
             </div>
 
             {/* Login Button */}
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading ? "Logging in..." : "Login"}
+            <Button type="submit" disabled={loading || redirecting} className="w-full">
+              {loading ? "Logging in..." : redirecting ? "Redirecting..." : "Login"}
             </Button>
 
             {/* Demo Credentials */}

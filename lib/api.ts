@@ -1,159 +1,173 @@
-// API utility with proper authentication and error handling
+// ==========================
+// Unified API (COOKIE BASED)
+// ==========================
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
-// Get token from localStorage
+const TOKEN_KEY = "adminToken";
+
+// ----------------------
+// TOKEN (COOKIE BASED)
+// ----------------------
+
 export const getToken = (): string => {
-  if (typeof window === 'undefined') return '';
-  const token = localStorage.getItem('adminToken');
-  console.log('🔐 getToken - Token found:', !!token);
-  console.log('🔐 getToken - Token value:', token ? `${token.substring(0, 20)}...` : 'null');
-  return token || '';
+  if (typeof window === "undefined") return "";
+
+  // Pehle cookie check karo
+  const cookieMatch = document.cookie.match(
+    new RegExp("(^| )" + TOKEN_KEY + "=([^;]+)")
+  );
+  if (cookieMatch) return cookieMatch[2];
+
+  // Phir localStorage check karo
+  return localStorage.getItem(TOKEN_KEY) || "";
 };
 
-// Redirect to login on auth failure
-export const handleAuthError = () => {
-  console.log('❌ Auth error - Redirecting to login...');
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('adminToken');
-    // Clear all cookies
-    document.cookie.split(";").forEach((c) => {
-      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-    });
-    // Redirect to login
-    window.location.href = '/login';
+export const setToken = (token: string): void => {
+  if (typeof window !== "undefined") {
+    // Cookie mein save karo
+    document.cookie = `${TOKEN_KEY}=${token}; path=/; max-age=86400`;
+    // LocalStorage mein bhi save karo
+    localStorage.setItem(TOKEN_KEY, token);
   }
 };
 
-// Generic fetch wrapper with auth
-export const authFetch = async (
+export const removeToken = (): void => {
+  if (typeof window !== "undefined") {
+    document.cookie = `${TOKEN_KEY}=; path=/; max-age=0`;
+  }
+};
+
+export const isLoggedIn = (): boolean => {
+  return !!getToken();
+};
+
+// ----------------------
+// AUTH FETCH
+// ----------------------
+
+export const authFetch = async <T = any>(
   endpoint: string,
   options: RequestInit = {}
-): Promise<any> => {
-  const url = `${BACKEND_URL}${endpoint}`;
+): Promise<T> => {
   const token = getToken();
   
-  console.log('📡 API Request:', { url, hasToken: !!token });
-  
+  console.log("🔑 authFetch token:", token ? token.substring(0, 20) + "..." : "NULL!")
+
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...options.headers,
+    "Content-Type": "application/json",
+    ...(options.headers || {}),
   };
-  
-  // Add authorization header
+
   if (token) {
-    (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
-    console.log('🔐 Added Bearer token to request');
+    headers["Authorization"] = `Bearer ${token}`;
   }
-  
-  try {
-    const response = await fetch(url, {
-      ...options,
-      headers,
-    });
-    
-    console.log('📡 API Response status:', response.status);
-    
-    const data = await response.json();
-    
-    // Handle authentication errors
-    if (response.status === 401 || response.status === 403) {
-      console.error('❌ Auth error:', data.message);
-      handleAuthError();
-      throw new Error(data.message || 'Authentication failed');
-    }
-    
-    if (!response.ok) {
-      console.error('❌ API Error:', data.message);
-      throw new Error(data.message || 'Request failed');
-    }
-    
-    console.log('✅ API Success:', data);
-    return data;
-  } catch (error: any) {
-    console.error('❌ API Request failed:', error.message);
-    
-    // Handle network errors
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      throw new Error('Cannot connect to server. Please check if backend is running.');
-    }
-    
-    throw error;
-  }
-};
 
-// Convenience methods
-export const api = {
-  get: (endpoint: string) => authFetch(endpoint, { method: 'GET' }),
-  post: (endpoint: string, body: any) => authFetch(endpoint, {
-    method: 'POST',
-    body: JSON.stringify(body),
-  }),
-  put: (endpoint: string, body: any) => authFetch(endpoint, {
-    method: 'PUT',
-    body: JSON.stringify(body),
-  }),
-  delete: (endpoint: string) => authFetch(endpoint, { method: 'DELETE' }),
-};
-
-// Check if user is logged in
-export const isLoggedIn = (): boolean => {
-  const token = getToken();
-  if (!token) return false;
-  
-  // Check if token is expired (basic check)
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const isExpired = payload.exp * 1000 < Date.now();
-    if (isExpired) {
-      console.log('❌ Token expired');
-      handleAuthError();
-      return false;
-    }
-    return true;
-  } catch {
-    console.log('❌ Invalid token format');
-    handleAuthError();
-    return false;
-  }
-};
-
-// Login function
-export const login = async (email: string, password: string): Promise<boolean> => {
-  console.log('🔐 Attempting login...');
-  
-  try {
-    const response = await fetch(`${BACKEND_URL}/api/user/admin`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    
-    const data = await response.json();
-    
-    if (data.success) {
-      console.log('✅ Login successful');
-      localStorage.setItem('adminToken', data.token);
-      document.cookie = `adminToken=${data.token}; path=/; max-age=86400`;
-      return true;
-    } else {
-      console.error('❌ Login failed:', data.message);
-      return false;
-    }
-  } catch (error: any) {
-    console.error('❌ Login error:', error.message);
-    return false;
-  }
-};
-
-// Logout function
-export const logout = () => {
-  console.log('🔐 Logging out...');
-  localStorage.removeItem('adminToken');
-  document.cookie.split(";").forEach((c) => {
-    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+  const res = await fetch(`${BACKEND_URL}${endpoint}`, {
+    ...options,
+    credentials: "include",
+    headers,
   });
-  if (typeof window !== 'undefined') {
-    window.location.href = '/login';
-  }
+
+  const data = await res.json();
+  return data;
+};
+// ----------------------
+// FORM DATA
+// ----------------------
+
+export const authFormDataFetch = async <T = any>(
+  endpoint: string,
+  formData: FormData
+): Promise<T> => {
+  const token = getToken();
+
+  const res = await fetch(`${BACKEND_URL}${endpoint}`, {
+    method: "POST",
+    headers: {
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+    body: formData,
+  });
+
+  return res.json();
+};
+
+// ----------------------
+// CUSTOMER QUERIES API
+// ----------------------
+
+export const getCustomerQueries = async <T = any>(
+  status?: string,
+  page: number = 1,
+  limit: number = 20
+): Promise<T> => {
+  const params = new URLSearchParams();
+  if (status) params.append('status', status);
+  params.append('page', page.toString());
+  params.append('limit', limit.toString());
+
+  return authFetch(`/api/contact/all?${params.toString()}`);
+};
+
+export const getCustomerQueryById = async <T = any>(id: string): Promise<T> => {
+  return authFetch(`/api/contact/${id}`);
+};
+
+export const updateQueryStatus = async <T = any>(
+  id: string,
+  status: string
+): Promise<T> => {
+  return authFetch(`/api/contact/${id}/status`, {
+    method: 'PUT',
+    body: JSON.stringify({ status }),
+  });
+};
+
+export const deleteCustomerQuery = async <T = any>(id: string): Promise<T> => {
+  return authFetch(`/api/contact/${id}`, {
+    method: 'DELETE',
+  });
+};
+
+export const replyToCustomerQuery = async <T = any>(
+  id: string,
+  reply: string
+): Promise<T> => {
+  return authFetch(`/api/contact/${id}/reply`, {
+    method: 'POST',
+    body: JSON.stringify({ reply }),
+  });
+};
+
+export const updateCustomerQueryReply = async <T = any>(
+  id: string,
+  reply: string
+): Promise<T> => {
+  return authFetch(`/api/contact/${id}/reply`, {
+    method: 'PUT',
+    body: JSON.stringify({ reply }),
+  });
+};
+
+export const getCustomerQueryStats = async <T = any>(): Promise<T> => {
+  return authFetch('/api/contact/stats');
+};
+
+export default {
+  getToken,
+  setToken,
+  removeToken,
+  isLoggedIn,
+  authFetch,
+  authFormDataFetch,
+  getCustomerQueries,
+  getCustomerQueryById,
+  updateQueryStatus,
+  deleteCustomerQuery,
+  replyToCustomerQuery,
+  updateCustomerQueryReply,
+  getCustomerQueryStats,
+  BACKEND_URL,
 };

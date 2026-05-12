@@ -301,20 +301,20 @@ export default function CategoriesPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 page-enter">
 
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Categories</h1>
-            <p className="text-muted-foreground">Manage your product categories and subcategories</p>
+            <h1 className="text-3xl font-bold tracking-tight gradient-text">Categories</h1>
+            <p className="text-gray-600 mt-1">Manage your product categories and subcategories</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={fetchCategories}>
+            <Button variant="outline" onClick={fetchCategories} className="btn-premium">
               <RefreshCw className="mr-2 h-4 w-4" />
               Refresh
             </Button>
-            <Button onClick={resetAddForm}>
+            <Button onClick={resetAddForm} className="btn-gradient">
               <Plus className="mr-2 h-4 w-4" />
               Add Category
             </Button>
@@ -323,76 +323,70 @@ export default function CategoriesPage() {
 
         {/* Stats Cards */}
         <div className="grid gap-4 sm:grid-cols-3">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <FolderTree className="h-5 w-5 text-primary" />
-                </div>
+          <div className="stat-card stat-card-blue">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Categories</p>
-                  <p className="text-2xl font-bold">{stats.total}</p>
+                  <p className="text-sm text-gray-600 font-medium">Total Categories</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">{stats.total}</p>
                 </div>
+                <FolderTree className="h-12 w-12 text-blue-500/20" />
               </div>
             </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <FolderTree className="h-5 w-5 text-green-600" />
-                </div>
+          </div>
+          <div className="stat-card stat-card-emerald">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">With Subcategories</p>
-                  <p className="text-2xl font-bold">{stats.withSubcategories}</p>
+                  <p className="text-sm text-gray-600 font-medium">With Subcategories</p>
+                  <p className="text-3xl font-bold text-emerald-600 mt-2">{stats.withSubcategories}</p>
                 </div>
+                <FolderTree className="h-12 w-12 text-emerald-500/20" />
               </div>
             </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <FolderTree className="h-5 w-5 text-blue-600" />
-                </div>
+          </div>
+          <div className="stat-card stat-card-purple">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Subcategories</p>
-                  <p className="text-2xl font-bold">{stats.totalSubcategories}</p>
+                  <p className="text-sm text-gray-600 font-medium">Total Subcategories</p>
+                  <p className="text-3xl font-bold text-purple-600 mt-2">{stats.totalSubcategories}</p>
                 </div>
+                <FolderTree className="h-12 w-12 text-purple-500/20" />
               </div>
             </CardContent>
-          </Card>
+          </div>
         </div>
 
         {/* Search */}
         <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Search categories..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="pl-10 input-premium"
           />
         </div>
 
         {/* Categories Table */}
-        <Card>
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base font-semibold">
+        <Card className="card-premium">
+          <CardHeader className="pb-4 border-b border-gray-200/50">
+            <CardTitle className="text-lg font-bold text-gray-900">
               All Categories
-              <span className="ml-2 text-sm font-normal text-muted-foreground">
+              <span className="ml-2 text-sm font-normal text-gray-600">
                 ({filteredCategories.length} of {totalCount})
               </span>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+              <div className="flex flex-col items-center justify-center py-16 text-gray-500">
                 <Loader2 className="h-8 w-8 animate-spin mb-4" />
                 <p>Loading categories...</p>
               </div>
             ) : filteredCategories.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+              <div className="flex flex-col items-center justify-center py-16 text-gray-500">
                 <FolderTree className="h-12 w-12 mb-4 opacity-30" />
                 <p className="text-lg font-medium">
                   {searchQuery ? "No categories found" : "No categories yet"}
@@ -401,7 +395,7 @@ export default function CategoriesPage() {
                   {searchQuery ? "Try a different search term" : "Create your first category to get started"}
                 </p>
                 {!searchQuery && (
-                  <Button onClick={resetAddForm} className="mt-4">
+                  <Button onClick={resetAddForm} className="mt-4 btn-gradient">
                     <Plus className="mr-2 h-4 w-4" />
                     Add Category
                   </Button>
@@ -409,47 +403,39 @@ export default function CategoriesPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="table-premium">
                   <thead>
-                    <tr className="border-y border-border bg-muted/50">
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Category
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground hidden md:table-cell">
-                        Subcategories
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground hidden lg:table-cell">
-                        Created
-                      </th>
-                      <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Actions
-                      </th>
+                    <tr>
+                      <th>Category</th>
+                      <th className="hidden md:table-cell">Subcategories</th>
+                      <th className="hidden lg:table-cell">Created</th>
+                      <th className="text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
+                  <tbody>
                     {filteredCategories.map((category) => (
-                      <tr key={category._id} className="hover:bg-muted/30 transition-colors">
-                        <td className="px-4 py-4">
+                      <tr key={category._id} className="hover-lift">
+                        <td>
                           <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                              <FolderTree className="h-5 w-5 text-primary" />
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                              <FolderTree className="h-5 w-5 text-blue-600" />
                             </div>
                             <div>
-                              <p className="font-medium">{category.name}</p>
-                              <p className="text-xs text-muted-foreground">/{category.slug}</p>
+                              <p className="font-semibold text-gray-900">{category.name}</p>
+                              <p className="text-xs text-gray-500">/{category.slug}</p>
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-4 hidden md:table-cell">
+                        <td className="hidden md:table-cell">
                           <div className="flex flex-wrap gap-1">
                             {category.subCategories && category.subCategories.length > 0 ? (
                               category.subCategories.slice(0, 3).map((sub) => (
-                                <Badge key={sub} variant="secondary" className="text-xs">
+                                <Badge key={sub} variant="secondary" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
                                   {sub}
                                 </Badge>
                               ))
                             ) : (
-                              <span className="text-sm text-muted-foreground">—</span>
+                              <span className="text-sm text-gray-500">—</span>
                             )}
                             {category.subCategories && category.subCategories.length > 3 && (
                               <Badge variant="outline" className="text-xs">
@@ -458,20 +444,20 @@ export default function CategoriesPage() {
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-4 text-sm text-muted-foreground hidden lg:table-cell">
+                        <td className="text-sm text-gray-600 hidden lg:table-cell">
                           {new Date(category.createdAt).toLocaleDateString('en-IN', {
                             day: '2-digit',
                             month: 'short',
                             year: 'numeric',
                           })}
                         </td>
-                        <td className="px-4 py-4 text-right">
+                        <td className="text-right">
                           <div className="flex justify-end gap-2">
                             <Button
                               variant="ghost"
                               size="icon"
                               onClick={() => openEditDialog(category)}
-                              className="h-8 w-8"
+                              className="h-8 w-8 hover:bg-blue-50 hover:text-blue-600"
                             >
                               <Edit2 className="h-4 w-4" />
                             </Button>
@@ -479,7 +465,7 @@ export default function CategoriesPage() {
                               variant="ghost"
                               size="icon"
                               onClick={() => openDeleteDialog(category)}
-                              className="h-8 w-8 text-destructive hover:text-destructive"
+                              className="h-8 w-8 hover:bg-red-50 hover:text-red-600"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -497,17 +483,17 @@ export default function CategoriesPage() {
 
       {/* Add Category Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] glass-effect">
           <DialogHeader>
-            <DialogTitle>Add New Category</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-xl font-bold text-gray-900">Add New Category</DialogTitle>
+            <DialogDescription className="text-gray-600">
               Create a new product category with optional subcategories.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleAddCategory} className="space-y-4">
             {/* Category Name */}
-            <div>
-              <label className="text-sm font-medium">Category Name *</label>
+            <div className="form-group">
+              <label className="form-label">Category Name *</label>
               <Input
                 placeholder="e.g., Men, Women, Kids"
                 value={formData.name}
@@ -515,27 +501,27 @@ export default function CategoriesPage() {
                   setFormData(prev => ({ ...prev, name: e.target.value }))
                   if (formErrors.name) setFormErrors(prev => ({ ...prev, name: "" }))
                 }}
-                className={`mt-1 ${formErrors.name ? 'border-destructive' : ''}`}
+                className={`form-input ${formErrors.name ? 'border-red-500 bg-red-50' : ''}`}
               />
               {formErrors.name && (
-                <p className="text-xs text-destructive mt-1">{formErrors.name}</p>
+                <p className="text-xs text-red-600 mt-1">{formErrors.name}</p>
               )}
             </div>
 
             {/* Description */}
-            <div>
-              <label className="text-sm font-medium">Description (optional)</label>
+            <div className="form-group">
+              <label className="form-label">Description (optional)</label>
               <Input
                 placeholder="Brief description of this category"
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                className="mt-1"
+                className="form-input"
               />
             </div>
 
             {/* Subcategories */}
-            <div>
-              <label className="text-sm font-medium">Subcategories</label>
+            <div className="form-group">
+              <label className="form-label">Subcategories</label>
               <div className="flex gap-2 mt-1">
                 <Input
                   placeholder="e.g., Topwear, Bottomwear"
@@ -547,9 +533,9 @@ export default function CategoriesPage() {
                       addSubCategory()
                     }
                   }}
-                  className="flex-1"
+                  className="flex-1 form-input"
                 />
-                <Button type="button" variant="outline" onClick={addSubCategory}>
+                <Button type="button" variant="outline" onClick={addSubCategory} className="btn-premium">
                   Add
                 </Button>
               </div>
@@ -558,12 +544,12 @@ export default function CategoriesPage() {
               {formData.subCategories.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-3">
                   {formData.subCategories.map((sub) => (
-                    <Badge key={sub} variant="secondary" className="gap-1 pl-2">
+                    <Badge key={sub} variant="secondary" className="gap-1 pl-2 bg-blue-50 text-blue-700 border-blue-200">
                       {sub}
                       <button
                         type="button"
                         onClick={() => removeSubCategory(sub)}
-                        className="hover:text-destructive p-0.5 rounded"
+                        className="hover:text-red-600 p-0.5 rounded"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -574,10 +560,10 @@ export default function CategoriesPage() {
             </div>
 
             <DialogFooter className="mt-6">
-              <Button type="button" variant="outline" onClick={() => setShowAddDialog(false)}>
+              <Button type="button" variant="outline" onClick={() => setShowAddDialog(false)} className="btn-premium">
                 Cancel
               </Button>
-              <Button type="submit" disabled={submitting}>
+              <Button type="submit" disabled={submitting} className="btn-gradient">
                 {submitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -597,17 +583,17 @@ export default function CategoriesPage() {
 
       {/* Edit Category Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] glass-effect">
           <DialogHeader>
-            <DialogTitle>Edit Category</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-xl font-bold text-gray-900">Edit Category</DialogTitle>
+            <DialogDescription className="text-gray-600">
               Update the category name and subcategories.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleUpdateCategory} className="space-y-4">
             {/* Category Name */}
-            <div>
-              <label className="text-sm font-medium">Category Name *</label>
+            <div className="form-group">
+              <label className="form-label">Category Name *</label>
               <Input
                 placeholder="e.g., Men, Women, Kids"
                 value={formData.name}
@@ -615,27 +601,27 @@ export default function CategoriesPage() {
                   setFormData(prev => ({ ...prev, name: e.target.value }))
                   if (formErrors.name) setFormErrors(prev => ({ ...prev, name: "" }))
                 }}
-                className={`mt-1 ${formErrors.name ? 'border-destructive' : ''}`}
+                className={`form-input ${formErrors.name ? 'border-red-500 bg-red-50' : ''}`}
               />
               {formErrors.name && (
-                <p className="text-xs text-destructive mt-1">{formErrors.name}</p>
+                <p className="text-xs text-red-600 mt-1">{formErrors.name}</p>
               )}
             </div>
 
             {/* Description */}
-            <div>
-              <label className="text-sm font-medium">Description (optional)</label>
+            <div className="form-group">
+              <label className="form-label">Description (optional)</label>
               <Input
                 placeholder="Brief description of this category"
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                className="mt-1"
+                className="form-input"
               />
             </div>
 
             {/* Subcategories */}
-            <div>
-              <label className="text-sm font-medium">Subcategories</label>
+            <div className="form-group">
+              <label className="form-label">Subcategories</label>
               <div className="flex gap-2 mt-1">
                 <Input
                   placeholder="e.g., Topwear, Bottomwear"
@@ -647,9 +633,9 @@ export default function CategoriesPage() {
                       addSubCategory()
                     }
                   }}
-                  className="flex-1"
+                  className="flex-1 form-input"
                 />
-                <Button type="button" variant="outline" onClick={addSubCategory}>
+                <Button type="button" variant="outline" onClick={addSubCategory} className="btn-premium">
                   Add
                 </Button>
               </div>
@@ -658,12 +644,12 @@ export default function CategoriesPage() {
               {formData.subCategories.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-3">
                   {formData.subCategories.map((sub) => (
-                    <Badge key={sub} variant="secondary" className="gap-1 pl-2">
+                    <Badge key={sub} variant="secondary" className="gap-1 pl-2 bg-blue-50 text-blue-700 border-blue-200">
                       {sub}
                       <button
                         type="button"
                         onClick={() => removeSubCategory(sub)}
-                        className="hover:text-destructive p-0.5 rounded"
+                        className="hover:text-red-600 p-0.5 rounded"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -674,10 +660,10 @@ export default function CategoriesPage() {
             </div>
 
             <DialogFooter className="mt-6">
-              <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
+              <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)} className="btn-premium">
                 Cancel
               </Button>
-              <Button type="submit" disabled={submitting}>
+              <Button type="submit" disabled={submitting} className="btn-gradient">
                 {submitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -697,23 +683,23 @@ export default function CategoriesPage() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent className="sm:max-w-[400px]">
+        <DialogContent className="sm:max-w-[400px] glass-effect">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-destructive" />
+            <DialogTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
+              <AlertCircle className="h-5 w-5 text-red-600" />
               Delete Category
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-gray-600">
               Are you sure you want to delete "{selectedCategory?.name}"? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           
           {selectedCategory && selectedCategory.subCategories && selectedCategory.subCategories.length > 0 && (
-            <div className="bg-muted p-3 rounded-lg">
-              <p className="text-sm font-medium">This category has {selectedCategory.subCategories.length} subcategories:</p>
+            <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
+              <p className="text-sm font-medium text-red-900">This category has {selectedCategory.subCategories.length} subcategories:</p>
               <div className="flex flex-wrap gap-1 mt-2">
                 {selectedCategory.subCategories.map((sub) => (
-                  <Badge key={sub} variant="secondary" className="text-xs">
+                  <Badge key={sub} variant="secondary" className="text-xs bg-red-100 text-red-700 border-red-200">
                     {sub}
                   </Badge>
                 ))}
@@ -722,13 +708,14 @@ export default function CategoriesPage() {
           )}
           
           <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)} className="btn-premium">
               Cancel
             </Button>
             <Button 
               variant="destructive" 
               onClick={handleDeleteCategory}
               disabled={submitting}
+              className="bg-red-600 hover:bg-red-700"
             >
               {submitting ? (
                 <>

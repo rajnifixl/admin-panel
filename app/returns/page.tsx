@@ -23,17 +23,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Search, Filter, RefreshCw, CheckCircle, XCircle, Clock, Eye } from "lucide-react"
+import { Search, Filter, RefreshCw, CheckCircle, XCircle, Clock, Eye, Package, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { authFetch, isLoggedIn } from "@/lib/api"
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"
-
-const statusStyles: Record<string, string> = {
-  "Pending": "bg-yellow-100 text-yellow-800",
-  "Approved": "bg-green-100 text-green-800",
-  "Rejected": "bg-red-100 text-red-800",
-}
 
 const reasonOptions = [
   "Defective",
@@ -168,72 +162,120 @@ export default function ReturnsPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="space-y-8 page-enter">
+        {/* Header Section */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Return Requests</h1>
-            <p className="text-muted-foreground">Manage product return requests</p>
+            <h1 className="text-3xl font-bold tracking-tight gradient-text">Return Requests</h1>
+            <p className="text-gray-600 mt-2">Manage and process product return requests</p>
           </div>
-          <Button onClick={fetchReturns} variant="outline" size="sm">
+          <Button 
+            onClick={fetchReturns} 
+            className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 w-fit"
+          >
             <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-4">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold">{stats.total}</div>
-                <p className="text-sm text-muted-foreground">Total Returns</p>
+        {/* Stat Cards Grid */}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Total Returns Card */}
+          <Card className="stat-card stat-card-blue shadow-sm hover:shadow-xl transition-all duration-300 border-0 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-cyan-600 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+            <CardContent className="p-6 relative z-10">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-600 mb-2">Total Returns</p>
+                  <p className="text-3xl font-bold text-gray-900 mb-3">{stats.total}</p>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs font-semibold text-blue-600">All time</span>
+                  </div>
+                </div>
+                <div className="p-3 rounded-xl bg-blue-100 group-hover:scale-110 transition-transform duration-300">
+                  <Package className="h-6 w-6 text-blue-600" />
+                </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-yellow-600">{stats.pending}</div>
-                <p className="text-sm text-muted-foreground">Pending</p>
+
+          {/* Pending Returns Card */}
+          <Card className="stat-card stat-card-orange shadow-sm hover:shadow-xl transition-all duration-300 border-0 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-orange-600 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+            <CardContent className="p-6 relative z-10">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-600 mb-2">Pending Returns</p>
+                  <p className="text-3xl font-bold text-amber-600 mb-3">{stats.pending}</p>
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-4 w-4 text-amber-600" />
+                    <span className="text-xs font-semibold text-amber-600">Awaiting action</span>
+                  </div>
+                </div>
+                <div className="p-3 rounded-xl bg-amber-100 group-hover:scale-110 transition-transform duration-300">
+                  <Clock className="h-6 w-6 text-amber-600" />
+                </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-600">{stats.approved}</div>
-                <p className="text-sm text-muted-foreground">Approved</p>
+
+          {/* Approved Returns Card */}
+          <Card className="stat-card stat-card-emerald shadow-sm hover:shadow-xl transition-all duration-300 border-0 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+            <CardContent className="p-6 relative z-10">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-600 mb-2">Approved Returns</p>
+                  <p className="text-3xl font-bold text-emerald-600 mb-3">{stats.approved}</p>
+                  <div className="flex items-center gap-1">
+                    <CheckCircle className="h-4 w-4 text-emerald-600" />
+                    <span className="text-xs font-semibold text-emerald-600">Processed</span>
+                  </div>
+                </div>
+                <div className="p-3 rounded-xl bg-emerald-100 group-hover:scale-110 transition-transform duration-300">
+                  <CheckCircle className="h-6 w-6 text-emerald-600" />
+                </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-red-600">{stats.rejected}</div>
-                <p className="text-sm text-muted-foreground">Rejected</p>
+
+          {/* Rejected Returns Card */}
+          <Card className="stat-card shadow-sm hover:shadow-xl transition-all duration-300 border-0 overflow-hidden bg-gradient-to-br from-red-50 to-pink-50">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-pink-600 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+            <CardContent className="p-6 relative z-10">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-600 mb-2">Rejected Returns</p>
+                  <p className="text-3xl font-bold text-red-600 mb-3">{stats.rejected}</p>
+                  <div className="flex items-center gap-1">
+                    <XCircle className="h-4 w-4 text-red-600" />
+                    <span className="text-xs font-semibold text-red-600">Declined</span>
+                  </div>
+                </div>
+                <div className="p-3 rounded-xl bg-red-100 group-hover:scale-110 transition-transform duration-300">
+                  <XCircle className="h-6 w-6 text-red-600" />
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Filters */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by product, user, reason..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
+        {/* Search & Filter Bar */}
+        <Card className="shadow-sm border-0 overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-4">
+              <div className="flex-1 relative group">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-200" />
+                <Input
+                  placeholder="Search by product, user, reason..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 w-full bg-gray-50 border-gray-200 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-all duration-200 rounded-lg"
+                />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full md:w-40">
+                <SelectTrigger className="w-full sm:w-48 bg-gray-50 border-gray-200 hover:bg-gray-100 transition-colors duration-200 rounded-lg">
+                  <Filter className="mr-2 h-4 w-4" />
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -248,57 +290,93 @@ export default function ReturnsPage() {
         </Card>
 
         {/* Returns Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Return Requests ({filtered.length})</CardTitle>
+        <Card className="shadow-sm border-0 overflow-hidden">
+          <CardHeader className="pb-4 border-b border-gray-200/50">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg font-semibold text-gray-900">Return Requests ({filtered.length})</CardTitle>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {loading ? (
-              <div className="flex justify-center py-8">
-                <div className="text-muted-foreground">Loading returns...</div>
+              <div className="flex items-center justify-center py-12 text-gray-500">
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading returns...
               </div>
             ) : filtered.length === 0 ? (
-              <div className="flex justify-center py-8">
-                <div className="text-muted-foreground">No return requests found</div>
+              <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+                <Package className="h-12 w-12 text-gray-300 mb-3" />
+                <p className="text-sm font-medium">No return requests found</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="table-premium w-full">
                   <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-3 px-4 font-medium">Product</th>
-                      <th className="text-left py-3 px-4 font-medium">User</th>
-                      <th className="text-left py-3 px-4 font-medium">Reason</th>
-                      <th className="text-left py-3 px-4 font-medium">Qty</th>
-                      <th className="text-left py-3 px-4 font-medium">Refund</th>
-                      <th className="text-left py-3 px-4 font-medium">Date</th>
-                      <th className="text-left py-3 px-4 font-medium">Status</th>
-                      <th className="text-left py-3 px-4 font-medium">Actions</th>
+                    <tr className="border-b border-gray-200/50 bg-gray-50/50">
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Product</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 hidden md:table-cell">User</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Reason</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 hidden sm:table-cell">Qty</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 hidden lg:table-cell">Refund</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 hidden sm:table-cell">Date</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Status</th>
+                      <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-600">Actions</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {filtered.map((ret) => (
-                      <tr key={ret._id} className="border-b hover:bg-muted/50">
-                        <td className="py-3 px-4 font-medium">{ret.productName}</td>
-                        <td className="py-3 px-4">{ret.userId?.name || "Unknown"}</td>
-                        <td className="py-3 px-4">{ret.reason}</td>
-                        <td className="py-3 px-4">{ret.quantity}</td>
-                        <td className="py-3 px-4 font-medium">${ret.refundAmount?.toFixed(2)}</td>
-                        <td className="py-3 px-4 text-xs text-muted-foreground">
+                  <tbody className="divide-y divide-gray-200/50">
+                    {filtered.map((ret, idx) => (
+                      <tr 
+                        key={ret._id} 
+                        className={`hover:bg-gray-50/50 transition-colors duration-200 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}`}
+                      >
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-gray-200 to-gray-300 flex-shrink-0 shadow-sm flex items-center justify-center">
+                              <Package className="h-5 w-5 text-gray-500" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-gray-900">{ret.productName}</p>
+                              <p className="text-xs text-gray-500">ID: {ret._id?.slice(0, 8)}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 hidden md:table-cell">
+                          <p className="text-sm font-medium text-gray-900">{ret.userId?.name || "Unknown"}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-sm text-gray-700">{ret.reason}</p>
+                        </td>
+                        <td className="px-6 py-4 hidden sm:table-cell text-sm font-medium text-gray-900">{ret.quantity}</td>
+                        <td className="px-6 py-4 hidden lg:table-cell text-sm font-semibold text-gray-900">₹{ret.refundAmount?.toFixed(2)}</td>
+                        <td className="px-6 py-4 hidden sm:table-cell text-xs text-gray-500">
                           {new Date(ret.createdAt).toLocaleDateString()}
                         </td>
-                        <td className="py-3 px-4">
-                          <Badge className={statusStyles[ret.status]}>
-                            {ret.status}
-                          </Badge>
+                        <td className="px-6 py-4">
+                          {ret.status === "Pending" && (
+                            <Badge className="badge-warning rounded-full">
+                              <Clock className="h-3 w-3 mr-1" />
+                              Pending
+                            </Badge>
+                          )}
+                          {ret.status === "Approved" && (
+                            <Badge className="badge-success rounded-full">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Approved
+                            </Badge>
+                          )}
+                          {ret.status === "Rejected" && (
+                            <Badge className="badge-danger rounded-full">
+                              <XCircle className="h-3 w-3 mr-1" />
+                              Rejected
+                            </Badge>
+                          )}
                         </td>
-                        <td className="py-3 px-4">
-                          <div className="flex gap-2 flex-wrap">
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex gap-2 justify-end flex-wrap">
                             <Button
                               size="sm"
                               variant="outline"
-                              className="text-blue-600 hover:text-blue-700"
+                              className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 border-gray-200"
                               onClick={() => router.push(`/returns/${ret._id}`)}
+                              title="View Details"
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
@@ -307,33 +385,35 @@ export default function ReturnsPage() {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="text-green-600 hover:text-green-700"
+                                  className="h-8 w-8 p-0 hover:bg-emerald-50 hover:text-emerald-600 transition-colors duration-200 border-gray-200"
                                   onClick={() => {
                                     setSelectedReturn(ret)
                                     setActionType("approve")
                                     setShowDialog(true)
                                   }}
                                   disabled={processingId === ret._id}
+                                  title="Approve Return"
                                 >
                                   <CheckCircle className="h-4 w-4" />
                                 </Button>
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="text-red-600 hover:text-red-700"
+                                  className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border-gray-200"
                                   onClick={() => {
                                     setSelectedReturn(ret)
                                     setActionType("reject")
                                     setShowDialog(true)
                                   }}
                                   disabled={processingId === ret._id}
+                                  title="Reject Return"
                                 >
                                   <XCircle className="h-4 w-4" />
                                 </Button>
                               </>
                             ) : (
-                              <span className="text-xs text-muted-foreground">
-                                {ret.status === "Approved" ? "✓ Processed" : "✗ Rejected"}
+                              <span className="text-xs text-gray-500 px-2 py-1">
+                                {ret.status === "Approved" ? "✓ Processed" : "✗ Declined"}
                               </span>
                             )}
                           </div>
@@ -344,48 +424,68 @@ export default function ReturnsPage() {
                 </table>
               </div>
             )}
+            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200/50 bg-gray-50/30">
+              <p className="text-sm text-gray-600">Showing <span className="font-semibold">{filtered.length}</span> of <span className="font-semibold">{returns.length}</span> returns</p>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="border-gray-200 hover:bg-gray-100 transition-colors duration-200">Previous</Button>
+                <Button variant="outline" size="sm" className="border-gray-200 hover:bg-gray-100 transition-colors duration-200">Next</Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Action Dialog */}
       <AlertDialog open={showDialog} onOpenChange={setShowDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl shadow-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>
+            <AlertDialogTitle className="text-xl font-bold">
               {actionType === "approve" ? "Approve Return Request?" : "Reject Return Request?"}
             </AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="space-y-4 mt-4">
               {actionType === "approve" ? (
-                <div className="space-y-2">
-                  <p>Product: <strong>{selectedReturn?.productName}</strong></p>
-                  <p>Quantity: <strong>{selectedReturn?.quantity}</strong></p>
-                  <p>Refund Amount: <strong>${selectedReturn?.refundAmount?.toFixed(2)}</strong></p>
-                  <p className="text-sm text-yellow-600 mt-4">
-                    ✓ Stock will be restored automatically
-                  </p>
+                <div className="space-y-3 bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                  <div>
+                    <p className="text-xs font-semibold text-gray-600 uppercase">Product</p>
+                    <p className="text-sm font-semibold text-gray-900 mt-1">{selectedReturn?.productName}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-600 uppercase">Quantity</p>
+                    <p className="text-sm font-semibold text-gray-900 mt-1">{selectedReturn?.quantity} units</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-600 uppercase">Refund Amount</p>
+                    <p className="text-sm font-semibold text-emerald-600 mt-1">₹{selectedReturn?.refundAmount?.toFixed(2)}</p>
+                  </div>
+                  <div className="pt-2 border-t border-emerald-200">
+                    <p className="text-xs text-emerald-700 font-medium">
+                      ✓ Stock will be restored automatically
+                    </p>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div>
-                    <p>Product: <strong>{selectedReturn?.productName}</strong></p>
-                    <p>Reason: <strong>{selectedReturn?.reason}</strong></p>
+                  <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                    <p className="text-xs font-semibold text-gray-600 uppercase">Product</p>
+                    <p className="text-sm font-semibold text-gray-900 mt-1">{selectedReturn?.productName}</p>
+                    <p className="text-xs font-semibold text-gray-600 uppercase mt-3">Reason</p>
+                    <p className="text-sm font-semibold text-gray-900 mt-1">{selectedReturn?.reason}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Rejection Reason (optional)</label>
+                    <label className="text-sm font-semibold text-gray-900">Rejection Reason (optional)</label>
                     <Input
                       placeholder="Why are you rejecting this return?"
                       value={rejectionReason}
                       onChange={(e) => setRejectionReason(e.target.value)}
-                      className="mt-2"
+                      className="mt-2 bg-gray-50 border-gray-200 focus-visible:ring-2 focus-visible:ring-red-500/20 focus-visible:border-red-500"
                     />
                   </div>
                 </div>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="flex gap-3 justify-end">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <div className="flex gap-3 justify-end pt-4">
+            <AlertDialogCancel className="border-gray-200 hover:bg-gray-100 transition-colors duration-200">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 if (actionType === "approve") {
@@ -395,9 +495,20 @@ export default function ReturnsPage() {
                 }
               }}
               disabled={processingId !== null}
-              className={actionType === "approve" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}
+              className={`${
+                actionType === "approve" 
+                  ? "bg-emerald-600 hover:bg-emerald-700" 
+                  : "bg-red-600 hover:bg-red-700"
+              } text-white transition-all duration-200 disabled:opacity-70`}
             >
-              {processingId ? "Processing..." : actionType === "approve" ? "Approve" : "Reject"}
+              {processingId ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                actionType === "approve" ? "Approve Return" : "Reject Return"
+              )}
             </AlertDialogAction>
           </div>
         </AlertDialogContent>
