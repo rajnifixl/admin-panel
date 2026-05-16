@@ -32,17 +32,36 @@ export default function AnalyticsPage() {
   const fetchOrders = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`${BACKEND_URL}/api/order/list`, {
-        headers: { authorization: getToken() },
-      })
-      const data = await res.json()
-      if (data.success) {
-        setOrders(data.orders)
-      } else {
-        toast.error("Failed to fetch data")
+      const token = getToken()
+      if (!token) {
+        toast.error("Admin token not found. Please login again.")
+        setLoading(false)
+        return
       }
-    } catch {
-      toast.error("Cannot connect to backend")
+
+      const res = await fetch(`${BACKEND_URL}/api/order/list`, {
+        headers: { 
+          authorization: token,
+          "Content-Type": "application/json"
+        },
+      })
+      
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`)
+      }
+
+      const data = await res.json()
+      
+      if (data.success && data.orders) {
+        setOrders(data.orders)
+        console.log(`✅ Loaded ${data.orders.length} orders`)
+      } else {
+        toast.error(data.message || "Failed to fetch data")
+        console.error("API response:", data)
+      }
+    } catch (error) {
+      console.error("Fetch error:", error)
+      toast.error("Cannot connect to backend. Make sure the server is running.")
     } finally {
       setLoading(false)
     }
@@ -59,8 +78,9 @@ export default function AnalyticsPage() {
       const month = d.getMonth()
       const year = d.getFullYear()
       const monthOrders = orders.filter(o => {
-        const od = new Date(o.date)
-        return od.getMonth() === month && od.getFullYear() === year
+        // Handle both timestamp (number) and date string formats
+        const orderDate = typeof o.date === 'number' ? new Date(o.date) : new Date(o.date || o.createdAt)
+        return orderDate.getMonth() === month && orderDate.getFullYear() === year
       })
       result.push({
         month: MONTHS[month],
@@ -101,8 +121,9 @@ export default function AnalyticsPage() {
       const d = new Date(now)
       d.setDate(now.getDate() - (6 - i))
       const dayOrders = orders.filter(o => {
-        const od = new Date(o.date)
-        return od.toDateString() === d.toDateString()
+        // Handle both timestamp (number) and date string formats
+        const orderDate = typeof o.date === 'number' ? new Date(o.date) : new Date(o.date || o.createdAt)
+        return orderDate.toDateString() === d.toDateString()
       })
       return {
         day: days[d.getDay()],

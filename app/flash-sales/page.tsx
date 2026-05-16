@@ -276,6 +276,7 @@ export default function FlashSalesPage() {
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       placeholder="Flash sale title"
+                      maxLength="100"
                       className="form-input"
                     />
                   </div>
@@ -287,6 +288,7 @@ export default function FlashSalesPage() {
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder="Flash sale description"
+                      maxLength="500"
                       className="form-input"
                     />
                   </div>
@@ -320,6 +322,8 @@ export default function FlashSalesPage() {
                       type="number"
                       value={formData.displayOrder}
                       onChange={(e) => setFormData({ ...formData, displayOrder: parseInt(e.target.value) })}
+                      inputMode="numeric"
+                      min="0"
                       className="form-input"
                     />
                   </div>
@@ -338,6 +342,8 @@ export default function FlashSalesPage() {
                         value={formData.backgroundColor}
                         onChange={(e) => setFormData({ ...formData, backgroundColor: e.target.value })}
                         placeholder="#ff6b6b"
+                        maxLength="7"
+                        pattern="^#[0-9A-Fa-f]{6}$"
                         className="form-input flex-1"
                       />
                     </div>

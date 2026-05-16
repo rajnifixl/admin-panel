@@ -138,6 +138,8 @@ export default function LoginPage() {
                     console.log("📝 Email changed:", e.target.value)
                     setEmail(e.target.value)
                   }}
+                  inputMode="email"
+                  maxLength="255"
                   className="pl-10"
                   required
                 />

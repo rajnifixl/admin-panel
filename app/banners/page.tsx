@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { AdminLayout } from "@/components/admin/admin-layout"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { RichTextEditor } from "@/components/editor/rich-text-editor"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import {
   Dialog,
   DialogContent,
@@ -30,6 +30,10 @@ export default function BannersPage() {
   const [formData, setFormData] = useState({
     title: "",
     subtitle: "",
+    heading: "",
+    subHeading: "",
+    discount: "",
+    description: "",
     image: "",
     buttonText: "Shop Now",
     redirectUrl: "/",
@@ -73,9 +77,9 @@ export default function BannersPage() {
     setUploading(true)
     try {
       const formDataObj = new FormData()
-      formDataObj.append('file', file)
+      formDataObj.append('image', file)   // field name must be 'image'
 
-      const response = await fetch(`${BACKEND_URL}/api/upload`, {
+      const response = await fetch(`${BACKEND_URL}/api/upload/image`, {  // correct endpoint
         method: 'POST',
         body: formDataObj,
         headers: {
@@ -85,7 +89,7 @@ export default function BannersPage() {
 
       const data = await response.json()
       if (data.success) {
-        setFormData({ ...formData, image: data.url })
+        setFormData(prev => ({ ...prev, image: data.url }))
         setImagePreview(data.url)
         toast.success("Image uploaded successfully")
       } else {
@@ -101,6 +105,8 @@ export default function BannersPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    console.log("FORM DATA => ", formData);
 
     if (!formData.title || !formData.image) {
       toast.error("Title and image are required")
@@ -188,17 +194,21 @@ export default function BannersPage() {
   const handleEdit = (banner: any) => {
     setEditingBanner(banner)
     setFormData({
-      title: banner.title,
-      subtitle: banner.subtitle,
-      image: banner.image,
-      buttonText: banner.buttonText,
-      redirectUrl: banner.redirectUrl,
+      title: banner.title || "",
+      subtitle: banner.subtitle || "",
+      heading: banner.heading || "",
+      subHeading: banner.subHeading || "",
+      discount: banner.discount || "",
+      description: banner.description || "",
+      image: banner.image || "",
+      buttonText: banner.buttonText || "Shop Now",
+      redirectUrl: banner.redirectUrl || "/",
       isActive: banner.isActive,
-      displayOrder: banner.displayOrder,
+      displayOrder: banner.displayOrder || 0,
       startDate: banner.startDate?.split('T')[0] || new Date().toISOString().split('T')[0],
       endDate: banner.endDate?.split('T')[0] || "",
     })
-    setImagePreview(banner.image)
+    setImagePreview(banner.image || "")
     setShowModal(true)
   }
 
@@ -207,6 +217,10 @@ export default function BannersPage() {
     setFormData({
       title: "",
       subtitle: "",
+      heading: "",
+      subHeading: "",
+      discount: "",
+      description: "",
       image: "",
       buttonText: "Shop Now",
       redirectUrl: "/",
@@ -245,47 +259,25 @@ export default function BannersPage() {
               <RefreshCw className="mr-2 h-4 w-4" />
               Refresh
             </Button>
-            <Dialog open={showModal} onOpenChange={setShowModal}>
+            <Dialog open={showModal} onOpenChange={(open) => { setShowModal(open); if (!open) resetForm(); }}>
               <DialogTrigger asChild>
                 <Button onClick={() => resetForm()} className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200">
                   <Plus className="mr-2 h-4 w-4" />
                   Add Banner
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl">
+              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle className="text-xl font-bold text-gray-900">
                     {editingBanner ? "Edit Banner" : "Create New Banner"}
                   </DialogTitle>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {/* Title */}
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  {/* Banner Image Upload */}
                   <div className="form-group">
-                    <label className="form-label">Title *</label>
-                    <Input
-                      value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      placeholder="Banner title"
-                      className="form-input"
-                    />
-                  </div>
-
-                  {/* Subtitle */}
-                  <div className="form-group">
-                    <label className="form-label">Subtitle</label>
-                    <Input
-                      value={formData.subtitle}
-                      onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-                      placeholder="Banner subtitle"
-                      className="form-input"
-                    />
-                  </div>
-
-                  {/* Image Upload */}
-                  <div className="form-group">
-                    <label className="form-label">Banner Image *</label>
-                    <div className="flex gap-4">
+                    <label className="form-label font-semibold text-sm text-gray-700 mb-1 block">Banner Image *</label>
+                    <div className="flex gap-4 items-start">
                       <div className="flex-1">
                         <Input
                           type="file"
@@ -294,46 +286,113 @@ export default function BannersPage() {
                           disabled={uploading}
                           className="form-input"
                         />
+                        {uploading && <p className="text-xs text-blue-500 mt-1">Uploading...</p>}
                       </div>
                       {imagePreview && (
                         <img
                           src={imagePreview}
                           alt="Preview"
-                          className="w-20 h-20 object-cover rounded-lg shadow-md"
+                          className="w-24 h-16 object-cover rounded-lg shadow-md border border-gray-200"
                         />
                       )}
                     </div>
                   </div>
 
-                  {/* Button Text */}
+                  {/* Two-column row: Title + Badge/Tag */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="form-group">
+                      <label className="form-label font-semibold text-sm text-gray-700 mb-1 block">Title * <span className="text-xs font-normal text-gray-400">(badge text, e.g. "LIMITED TIME")</span></label>
+                      <Input
+                        value={formData.title}
+                        onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                        placeholder="e.g. LIMITED TIME"
+                        className="form-input"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label font-semibold text-sm text-gray-700 mb-1 block">Discount <span className="text-xs font-normal text-gray-400">(e.g. "UP TO 50-80% OFF")</span></label>
+                      <Input
+                        value={formData.discount}
+                        onChange={(e) => setFormData(prev => ({ ...prev, discount: e.target.value }))}
+                        placeholder="e.g. UP TO 50-80% OFF"
+                        className="form-input"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Two-column row: Heading + SubHeading */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="form-group">
+                      <label className="form-label font-semibold text-sm text-gray-700 mb-1 block">Heading <span className="text-xs font-normal text-gray-400">(main title on banner)</span></label>
+                      <Input
+                        value={formData.heading}
+                        onChange={(e) => setFormData(prev => ({ ...prev, heading: e.target.value }))}
+                        placeholder="e.g. GRAND SUMMER SALE"
+                        className="form-input"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label font-semibold text-sm text-gray-700 mb-1 block">Sub Heading <span className="text-xs font-normal text-gray-400">(accent subtitle)</span></label>
+                      <Input
+                        value={formData.subHeading}
+                        onChange={(e) => setFormData(prev => ({ ...prev, subHeading: e.target.value }))}
+                        placeholder="e.g. PREMIUM FASHION"
+                        className="form-input"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Subtitle */}
                   <div className="form-group">
-                    <label className="form-label">Button Text</label>
+                    <label className="form-label font-semibold text-sm text-gray-700 mb-1 block">Subtitle <span className="text-xs font-normal text-gray-400">(short tagline below heading)</span></label>
                     <Input
-                      value={formData.buttonText}
-                      onChange={(e) => setFormData({ ...formData, buttonText: e.target.value })}
-                      placeholder="Shop Now"
+                      value={formData.subtitle}
+                      onChange={(e) => setFormData(prev => ({ ...prev, subtitle: e.target.value }))}
+                      placeholder="e.g. Latest trends in luxury clothing"
                       className="form-input"
                     />
                   </div>
 
-                  {/* Redirect URL */}
+                  {/* Description - Rich Text Editor */}
                   <div className="form-group">
-                    <label className="form-label">Redirect URL</label>
-                    <Input
-                      value={formData.redirectUrl}
-                      onChange={(e) => setFormData({ ...formData, redirectUrl: e.target.value })}
-                      placeholder="/"
-                      className="form-input"
+                    <RichTextEditor
+                      label="Description"
+                      value={formData.description}
+                      onChange={(val: string) => setFormData(prev => ({ ...prev, description: val }))}
+                      placeholder="Write a detailed banner description..."
+                      height={200}
                     />
+                  </div>
+
+                  {/* Two-column row: Button Text + Redirect URL */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="form-group">
+                      <label className="form-label font-semibold text-sm text-gray-700 mb-1 block">Button Text</label>
+                      <Input
+                        value={formData.buttonText}
+                        onChange={(e) => setFormData(prev => ({ ...prev, buttonText: e.target.value }))}
+                        placeholder="Shop Now"
+                        className="form-input"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label font-semibold text-sm text-gray-700 mb-1 block">Redirect URL</label>
+                      <Input
+                        value={formData.redirectUrl}
+                        onChange={(e) => setFormData(prev => ({ ...prev, redirectUrl: e.target.value }))}
+                        placeholder="/"
+                        className="form-input"
+                      />
+                    </div>
                   </div>
 
                   {/* Display Order */}
                   <div className="form-group">
-                    <label className="form-label">Display Order</label>
+                    <label className="form-label font-semibold text-sm text-gray-700 mb-1 block">Display Order</label>
                     <Input
                       type="number"
                       value={formData.displayOrder}
-                      onChange={(e) => setFormData({ ...formData, displayOrder: parseInt(e.target.value) })}
+                      onChange={(e) => setFormData(prev => ({ ...prev, displayOrder: parseInt(e.target.value) || 0 }))}
                       className="form-input"
                     />
                   </div>
@@ -341,20 +400,20 @@ export default function BannersPage() {
                   {/* Dates */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="form-group">
-                      <label className="form-label">Start Date</label>
+                      <label className="form-label font-semibold text-sm text-gray-700 mb-1 block">Start Date</label>
                       <Input
                         type="date"
                         value={formData.startDate}
-                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                        onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
                         className="form-input"
                       />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">End Date</label>
+                      <label className="form-label font-semibold text-sm text-gray-700 mb-1 block">End Date</label>
                       <Input
                         type="date"
                         value={formData.endDate}
-                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                        onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
                         className="form-input"
                       />
                     </div>
@@ -364,16 +423,17 @@ export default function BannersPage() {
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 border border-gray-200">
                     <input
                       type="checkbox"
+                      id="isActive"
                       checked={formData.isActive}
-                      onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                      onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
                       className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
-                    <label className="text-sm font-medium text-gray-700">Active</label>
+                    <label htmlFor="isActive" className="text-sm font-medium text-gray-700 cursor-pointer">Active (visible on homepage)</label>
                   </div>
 
                   {/* Submit */}
                   <div className="flex gap-2 justify-end pt-4 border-t border-gray-200">
-                    <Button variant="outline" onClick={() => setShowModal(false)} className="border-gray-200 hover:bg-gray-50 transition-colors duration-200">
+                    <Button type="button" variant="outline" onClick={() => { setShowModal(false); resetForm(); }} className="border-gray-200 hover:bg-gray-50 transition-colors duration-200">
                       Cancel
                     </Button>
                     <Button type="submit" disabled={uploading} className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200">
@@ -406,7 +466,7 @@ export default function BannersPage() {
                   <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden group">
                     <img
                       src={banner.image}
-                      alt={banner.title}
+                      alt={banner.heading || banner.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -417,17 +477,30 @@ export default function BannersPage() {
                         {banner.isActive ? '✓ Active' : 'Inactive'}
                       </Badge>
                     </div>
+                    {banner.discount && (
+                      <div className="absolute top-3 left-3">
+                        <Badge className="bg-red-100 text-red-700 border-0 font-semibold text-xs">
+                          {banner.discount}
+                        </Badge>
+                      </div>
+                    )}
                   </div>
 
                   {/* Content Section */}
                   <CardContent className="pt-5 pb-4 flex-1 flex flex-col">
-                    <h3 className="font-bold text-lg text-gray-900 mb-1 line-clamp-2">{banner.title}</h3>
-                    {banner.subtitle && (
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{banner.subtitle}</p>
+                    {banner.heading && (
+                      <h3 className="font-bold text-lg text-gray-900 mb-0.5 line-clamp-1">{banner.heading}</h3>
                     )}
-                    
+                    {banner.subHeading && (
+                      <p className="text-sm font-semibold text-indigo-600 mb-1 line-clamp-1">{banner.subHeading}</p>
+                    )}
+                    {banner.subtitle && (
+                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">{banner.subtitle}</p>
+                    )}
+                    <p className="text-xs text-gray-400 mb-3 line-clamp-1">Badge: {banner.title}</p>
+
                     {/* Meta Info */}
-                    <div className="space-y-2 mb-4 flex-1">
+                    <div className="space-y-1 mb-4 flex-1">
                       <div className="flex items-center gap-2 text-xs text-gray-600">
                         <Calendar className="h-3 w-3" />
                         <span>Order: <span className="font-semibold text-gray-900">{banner.displayOrder}</span></span>

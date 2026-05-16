@@ -310,6 +310,8 @@ export default function CustomerQueriesPage() {
                   placeholder="Search by name, email, subject..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
+                  maxLength="100"
+                  inputMode="text"
                   className="pl-9 w-full bg-gray-50 border-gray-200 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-all duration-200 rounded-lg"
                 />
               </div>

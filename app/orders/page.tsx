@@ -215,6 +215,8 @@ export default function OrdersPage() {
                     placeholder="Search orders..."
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
+                    maxLength="100"
+                    inputMode="text"
                     className="pl-9 w-full sm:w-64 input-premium"
                   />
                 </div>

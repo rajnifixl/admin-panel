@@ -551,7 +551,9 @@ export default function AddProductPage() {
                   value={form.price} 
                   onChange={handleChange} 
                   placeholder="499" 
-                  min="0" 
+                  min="0"
+                  inputMode="decimal"
+                  step="0.01"
                 />
                 {errors.price && <div className="ap-error"><AlertCircle size={12} /> {errors.price}</div>}
               </div>
@@ -566,15 +568,32 @@ export default function AddProductPage() {
                   placeholder="0" 
                   min="0" 
                   max="100"
+                  inputMode="numeric"
                 />
               </div>
               <div>
                 <label className="ap-label">Stock</label>
-                <input className="ap-input" name="stock" type="number" value={form.stock} onChange={handleChange} placeholder="50" min="0" />
+                <input 
+                  className="ap-input" 
+                  name="stock" 
+                  type="number" 
+                  value={form.stock} 
+                  onChange={handleChange} 
+                  placeholder="50" 
+                  min="0"
+                  inputMode="numeric"
+                />
               </div>
               <div>
                 <label className="ap-label">Brand</label>
-                <input className="ap-input" name="brand" value={form.brand} onChange={handleChange} placeholder="Nike" />
+                <input 
+                  className="ap-input" 
+                  name="brand" 
+                  value={form.brand} 
+                  onChange={handleChange} 
+                  placeholder="Nike"
+                  maxLength="50"
+                />
               </div>
             </div>
 
@@ -607,7 +626,14 @@ export default function AddProductPage() {
             <div className="ap-grid-2" style={{ marginBottom: 16 }}>
               <div>
                 <label className="ap-label">SKU</label>
-                <input className="ap-input" name="sku" value={form.sku} onChange={handleChange} placeholder="NK-001" />
+                <input 
+                  className="ap-input" 
+                  name="sku" 
+                  value={form.sku} 
+                  onChange={handleChange} 
+                  placeholder="NK-001"
+                  maxLength="50"
+                />
               </div>
               <div></div>
             </div>

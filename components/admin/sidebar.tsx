@@ -19,6 +19,7 @@ import {
   Folder,
   Tag,
   Sparkles,
+  Image,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -27,6 +28,7 @@ const navigation = [
   { name: "Orders", href: "/orders", icon: ShoppingCart },
   { name: "Products", href: "/products", icon: Package },
   { name: "Categories", href: "/categories", icon: FolderTree },
+  { name: "Banners", href: "/banners", icon: Image },
   { name: "Coupons", href: "/coupons", icon: Tag },
   { name: "Customers", href: "/customers", icon: Users },
   { name: "Customer Queries", href: "/customer-queries", icon: MessageSquare },
@@ -34,7 +36,7 @@ const navigation = [
   { name: "Reviews", href: "/reviews", icon: MessageSquare },
   { name: "Blogs", href: "/blogs", icon: BookOpen },
   { name: "Blog Categories", href: "/blogs/categories", icon: Folder },
-  { name: "Analytics", href: "/analytics", icon: BarChart3 },
+  // { name: "Analytics", href: "/analytics", icon: BarChart3 },
 ]
 
 interface SidebarProps {
