@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { AdminLayout } from "@/components/admin/admin-layout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { PaymentBadges } from "@/components/PaymentBadges"
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -35,6 +36,7 @@ const getStockStatus = (stock: number) => {
 
 export default function ProductsPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState("")
   const [categoryFilter, setCategoryFilter] = useState("all")
   const [products, setProducts] = useState<any[]>([])
@@ -68,8 +70,10 @@ export default function ProductsPage() {
       router.push('/login');
       return;
     }
+    // ✅ FIX: Fetch products on mount and when refresh parameter changes
+    console.log('🔄 useEffect triggered, refresh param:', searchParams.get('refresh'))
     fetchProducts()
-  }, [router])
+  }, [searchParams])
 
   // ── DELETE ──
   const handleDelete = async () => {
@@ -218,6 +222,7 @@ export default function ProductsPage() {
                       <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Product</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 hidden md:table-cell">Category</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Price</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 hidden lg:table-cell">Payment Options</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 hidden sm:table-cell">Stock</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Status</th>
                       <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-600">Actions</th>
@@ -248,6 +253,14 @@ export default function ProductsPage() {
                             </Badge>
                           </td>
                           <td className="px-6 py-4 text-sm font-semibold text-gray-900">₹{product.price}</td>
+                          <td className="px-6 py-4 hidden lg:table-cell">
+                            <PaymentBadges 
+                              paymentOptions={product.paymentOptions}
+                              onlineDiscount={product.onlineDiscount}
+                              offerLabel={product.offerLabel}
+                              compact={true}
+                            />
+                          </td>
                           <td className="px-6 py-4 text-sm hidden sm:table-cell text-gray-600">{stock} units</td>
                           <td className="px-6 py-4">
                             <Badge variant="secondary" className={`${stockInfo.color} rounded-full`}>

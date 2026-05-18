@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { RichTextEditor } from "@/components/editor/rich-text-editor"
+import { PaymentOfferSection } from "@/components/PaymentOfferSection"
 import { ArrowLeft, ImagePlus, X, GripVertical, Video, Loader2, CheckCircle2, Star, RefreshCw, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -51,6 +52,9 @@ export default function AddProductPage() {
     bestseller: false,
     paymentModeCOD: true,
     paymentModeOnline: false,
+    // ✅ ADVANCED PAYMENT OFFER SYSTEM
+    onlineDiscount: 0,
+    offerLabel: "",
     discount: 0,
     discountStartDate: "",
     discountEndDate: "",
@@ -268,6 +272,12 @@ export default function AddProductPage() {
     }
     formData.append("paymentMode", paymentMode)
 
+    // ✅ ADVANCED PAYMENT OFFER SYSTEM
+    formData.append("paymentOptionsCOD", String(form.paymentModeCOD))
+    formData.append("paymentOptionsOnline", String(form.paymentModeOnline))
+    formData.append("onlineDiscount", String(form.onlineDiscount))
+    formData.append("offerLabel", form.offerLabel)
+
     // optional fields
     formData.append("discount", String(form.discount))
     if (form.discountStartDate) formData.append("discountStartDate", form.discountStartDate)
@@ -326,7 +336,8 @@ export default function AddProductPage() {
 
     if (response.ok && data.success) {
       toast.success("Product added successfully!")
-      router.push("/products")
+      // ✅ FIX: Add refresh parameter to trigger products list refresh
+      router.push("/products?refresh=" + Date.now())
     } else {
       console.error("❌ Backend error:", data)
       toast.error(data.message || "Failed to add product")
@@ -592,7 +603,7 @@ export default function AddProductPage() {
                   value={form.brand} 
                   onChange={handleChange} 
                   placeholder="Nike"
-                  maxLength="50"
+                  maxLength={50}
                 />
               </div>
             </div>
@@ -632,7 +643,7 @@ export default function AddProductPage() {
                   value={form.sku} 
                   onChange={handleChange} 
                   placeholder="NK-001"
-                  maxLength="50"
+                  maxLength={50}
                 />
               </div>
               <div></div>
@@ -824,6 +835,10 @@ export default function AddProductPage() {
 
   </div>
 </div>
+
+          {/* ✅ ADVANCED PAYMENT OFFER SYSTEM */}
+          <PaymentOfferSection form={form} setForm={setForm} errors={errors} />
+
           {/* ✅ BUY X GET Y OFFER */}
           <div className="ap-section">
             <div className="ap-section-title">🎁 Buy X Get Y Offer</div>
